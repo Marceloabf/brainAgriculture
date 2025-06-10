@@ -7,6 +7,9 @@ export class CreateHarvestDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString({ message: 'O ID da fazenda deve ser uma string.' })
+  farmId: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateCropDto)
