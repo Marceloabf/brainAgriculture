@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, ValidateNested, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateNested, IsArray, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateCropDto } from 'src/modules/crop/dto/create-crop.dto';
 
@@ -7,7 +7,8 @@ export class CreateHarvestDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString({ message: 'O ID da fazenda deve ser uma string.' })
+  @IsUUID()
+  @IsNotEmpty()
   farmId: string;
 
   @IsArray()
