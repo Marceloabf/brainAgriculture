@@ -39,6 +39,19 @@ export class CropService {
     }
   }
 
+  async findOne(id: string): Promise<Crop> {
+  const crop = await this.cropRepository.findOne({
+    where: { id },
+    relations: ['harvest'], 
+  });
+
+  if (!crop) {
+    throw new NotFoundException(`Cultura com ID '${id}' não encontrada.`);
+  }
+
+  return crop;
+}
+
   async findAll(): Promise<Crop[]> {
     return this.cropRepository.find({ relations: ['harvest'] });
   }

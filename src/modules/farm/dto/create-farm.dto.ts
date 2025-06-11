@@ -27,11 +27,6 @@ export class CreateFarmDto {
   @Min(0)
   vegetationArea: number;
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateHarvestDto)
-  harvests: CreateHarvestDto[];
-
   @IsUUID()
   @IsNotEmpty()
   producerId: string;
