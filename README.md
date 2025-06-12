@@ -1,98 +1,252 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Brain Agriculture API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API backend desenvolvida em NestJS para gerenciamento agrícola, incluindo módulos de produtores rurais, fazendas, safras e culturas.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias utilizadas
 
-## Description
+- **NestJS** (Framework Node.js)
+- **TypeScript** (Linguagem de programação)
+- **TypeORM** (ORM para PostgreSQL)
+- **PostgreSQL** (Banco de dados relacional)
+- **Jest** (Testes automatizados)
+- **UUID** (Identificadores únicos para entidades)
+- **Class Validator** (Validação de dados)
+- **Class Transformer** (Transformação de dados)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Estrutura do projeto
 
-## Project setup
+\`\`\`
+src/
+├── modules/
+│   ├── producer/          # Módulo de produtores rurais
+│   │   ├── dto/           # Data Transfer Objects
+│   │   ├── entities/      # Entidades do banco de dados
+│   │   ├── tests/         # Testes unitários
+│   │   ├── producer.controller.ts
+│   │   ├── producer.service.ts
+│   │   └── producer.module.ts
+│   ├── farm/              # Módulo de fazendas
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   ├── tests/
+│   │   ├── farm.controller.ts
+│   │   ├── farm.service.ts
+│   │   └── farm.module.ts
+│   ├── harvest/           # Módulo de safras
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   ├── tests/
+│   │   ├── harvest.controller.ts
+│   │   ├── harvest.service.ts
+│   │   └── harvest.module.ts
+│   └── crop/              # Módulo de culturas
+│       ├── dto/
+│       ├── entities/
+│       ├── tests/
+│       ├── crop.controller.ts
+│       ├── crop.service.ts
+│       └── crop.module.ts
+├── common/                # Código compartilhado e utilitários
+├── config/                # Configuração do ambiente e banco de dados
+├── app.module.ts          # Módulo principal da aplicação
+└── main.ts                # Ponto de entrada da aplicação
+test/
+├── setup.ts               # Configuração global dos testes
+└── jest.config.js         # Configuração do Jest
+\`\`\`
 
-```bash
-$ npm install
-```
+## Funcionalidades
 
-## Compile and run the project
+### Módulo Producer (Produtores)
+- ✅ Criar, listar, buscar, atualizar e remover produtores
+- ✅ Validação de CPF/CNPJ
+- ✅ Relacionamento com fazendas
 
-```bash
-# development
-$ npm run start
+### Módulo Farm (Fazendas)
+- ✅ Gerenciamento completo de fazendas
+- ✅ Validação de áreas (total, agrícola, vegetação)
+- ✅ Relacionamento com produtores e safras
 
-# watch mode
-$ npm run start:dev
+### Módulo Harvest (Safras)
+- ✅ Controle de safras por fazenda
+- ✅ Prevenção de duplicação de nomes por fazenda
+- ✅ Relacionamento com culturas
 
-# production mode
-$ npm run start:prod
-```
+### Módulo Crop (Culturas)
+- ✅ Gerenciamento de culturas por safra
+- ✅ Relacionamento com safras
 
-## Run tests
+## Como rodar o projeto
 
-```bash
-# unit tests
-$ npm run test
+### Requisitos
+- Node.js >= 18.x
+- PostgreSQL >= 12.x
+- npm ou yarn
 
-# e2e tests
-$ npm run test:e2e
+### Passos
 
-# test coverage
-$ npm run test:cov
-```
+1. **Clone o repositório:**
+\`\`\`bash
+git clone <repo-url>
+cd brain-agriculture-api
+\`\`\`
 
-## Deployment
+2. **Instale as dependências:**
+\`\`\`bash
+npm install
+\`\`\`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+3. **Configure variáveis de ambiente:**
+Copie e edite o `.env.example` para `.env`:
+\`\`\`env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=seu_usuario
+DATABASE_PASSWORD=sua_senha
+DATABASE_NAME=brain_agriculture
+DATABASE_SYNCHRONIZE=true
+\`\`\`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+4. **Configure o banco de dados:**
+Certifique-se de que o PostgreSQL está rodando e crie o banco de dados:
+\`\`\`sql
+CREATE DATABASE brain_agriculture;
+\`\`\`
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+5. **Execute as migrations (se aplicável):**
+\`\`\`bash
+npm run typeorm migration:run
+\`\`\`
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+6. **Rode a aplicação:**
+\`\`\`bash
+# Desenvolvimento
+npm run start:dev
 
-## Resources
+# Produção
+npm run start:prod
+\`\`\`
 
-Check out a few resources that may come in handy when working with NestJS:
+A API estará disponível em `http://localhost:3000`
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Testes
 
-## Support
+### Executar testes
+\`\`\`bash
+# Todos os testes
+npm run test
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Testes em modo watch
+npm run test:watch
 
-## Stay in touch
+# Testes com cobertura
+npm run test:cov
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Testes end-to-end
+npm run test:e2e
+\`\`\`
 
-## License
+### Estrutura dos testes
+- **Testes unitários**: Cada service possui seus testes em `src/modules/*/tests/`
+- **Configuração**: Arquivo `test/setup.ts` com configurações globais
+- **Mocks**: Repositórios mockados para isolamento dos testes
+- **Cobertura**: Relatórios de cobertura gerados na pasta `coverage/`
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Configuração do Jest
+O projeto utiliza uma configuração customizada do Jest:
+- **Timeout**: 30 segundos para testes assíncronos
+- **Mocks**: Limpeza automática entre testes
+- **TypeScript**: Suporte completo via ts-jest
+- **Módulos**: Mapeamento de paths para imports absolutos
+
+## Endpoints da API
+
+### Produtores (`/producers`)
+- `GET /producers` - Listar todos os produtores
+- `GET /producers/:id` - Buscar produtor por ID
+- `POST /producers` - Criar novo produtor
+- `PATCH /producers/:id` - Atualizar produtor
+- `DELETE /producers/:id` - Remover produtor
+
+### Fazendas (`/farms`)
+- `GET /farms` - Listar todas as fazendas
+- `GET /farms/:id` - Buscar fazenda por ID
+- `POST /farms` - Criar nova fazenda
+- `PATCH /farms/:id` - Atualizar fazenda
+- `DELETE /farms/:id` - Remover fazenda
+
+### Safras (`/harvests`)
+- `GET /harvests` - Listar todas as safras
+- `GET /harvests/:id` - Buscar safra por ID
+- `POST /harvests` - Criar nova safra
+- `PATCH /harvests/:id` - Atualizar safra
+- `DELETE /harvests/:id` - Remover safra
+
+### Culturas (`/crops`)
+- `GET /crops` - Listar todas as culturas
+- `GET /crops/:id` - Buscar cultura por ID
+- `GET /crops/harvest/:harvestId` - Listar culturas por safra
+- `POST /crops` - Criar nova cultura
+- `PATCH /crops/:id` - Atualizar cultura
+- `DELETE /crops/:id` - Remover cultura
+
+## Validações implementadas
+
+- **CPF/CNPJ**: Validação de formato e dígitos verificadores
+- **Áreas**: Soma das áreas agrícola e vegetação não pode exceder área total
+- **Relacionamentos**: Validação de existência de entidades relacionadas
+- **Duplicação**: Prevenção de nomes duplicados onde aplicável
+
+## Arquitetura
+
+### Padrões utilizados
+- **Repository Pattern**: Abstração da camada de dados
+- **DTO Pattern**: Validação e transformação de dados
+- **Dependency Injection**: Inversão de controle via NestJS
+- **Modular Architecture**: Separação por domínios de negócio
+
+### Relacionamentos
+\`\`\`
+Producer (1) ←→ (N) Farm (1) ←→ (N) Harvest (1) ←→ (N) Crop
+\`\`\`
+
+## Troubleshooting
+
+### Problemas comuns
+
+1. **Erro de conexão com banco:**
+   - Verifique se o PostgreSQL está rodando
+   - Confirme as credenciais no arquivo `.env`
+
+2. **Falhas nos testes:**
+   - Execute `npm run test:clearCache`
+   - Verifique se não há processos Jest em execução
+
+3. **Imports não encontrados:**
+   - Verifique o `tsconfig.json` e `jest.config.js`
+   - Confirme os paths de módulos
+
+## Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## Considerações finais
+
+- **Arquitetura modular**: Facilita manutenção e escalabilidade
+- **UUIDs**: Identificadores únicos evitam conflitos
+- **Validações robustas**: Garantem integridade dos dados
+- **Testes abrangentes**: Cobertura dos cenários principais
+- **TypeScript**: Type safety em todo o projeto
+- **Documentação inline**: Código autodocumentado
+
+## Contato
+
+Em caso de dúvidas ou sugestões, entre em contato: mrcloabf@gmail.com
+
+## Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
