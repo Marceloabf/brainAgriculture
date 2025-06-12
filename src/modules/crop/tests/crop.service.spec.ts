@@ -1,161 +1,186 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CropService } from '../crop.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Crop } from '../entities/crop.entity';
-import { Harvest } from '../../harvest/entities/harvest.entity';
-import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { Test, type TestingModule } from "@nestjs/testing"
+import { getRepositoryToken } from "@nestjs/typeorm"
+import { NotFoundException } from "@nestjs/common"
+import { CropService } from "../crop.service"
+import { Crop } from "../entities/crop.entity"
+import { Harvest } from "src/modules/harvest/entities/harvest.entity"
+import type { CreateCropDto } from "../dto/create-crop.dto"
+import type { UpdateCropDto } from "../dto/update-crop.dto"
+import { jest } from "@jest/globals"
 
-const mockCropRepository = () => ({
-  create: jest.fn(),
-  save: jest.fn(),
-  find: jest.fn(),
-  findOne: jest.fn(),
-  preload: jest.fn(),
-  remove: jest.fn(),
-});
+describe("CropService", () => {
+  let service: CropService
+  let cropRepository: any
+  let harvestRepository: any
 
-const mockHarvestRepository = () => ({
-  findOne: jest.fn(),
-});
+  const mockHarvest = {
+    id: "uuid-harvest-1",
+    name: "Safra Verão",
+    farm: {
+      id: "uuid-farm-1",
+      name: "Fazenda Primavera",
+      city: "Uberlândia",
+      state: "MG",
+      totalArea: 100,
+      agriculturalArea: 60,
+      vegetationArea: 40,
+      producer: {
+        id: "uuid-producer-1",
+        name: "João da Silva",
+        document: "123.456.789-00",
+        farms: [],
+      },
+      harvests: [],
+    },
+    crops: [],
+  }
 
-describe('CropService', () => {
-  let service: CropService;
-  let cropRepository: jest.Mocked<Repository<Crop>>;
-  let harvestRepository: jest.Mocked<Repository<Harvest>>;
+  const mockCrop = {
+    id: "uuid-crop-1",
+    name: "Milho",
+    harvest: mockHarvest,
+  }
 
   beforeEach(async () => {
+    const mockCropRepository = {
+      create: jest.fn(),
+      save: jest.fn(),
+      find: jest.fn(),
+      findOne: jest.fn(), 
+      findOneBy: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      remove: jest.fn(),
+      preload: jest.fn(),
+    }
+
+    const mockHarvestRepository = {
+      findOne: jest.fn(),
+      findOneBy: jest.fn(),
+    }
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CropService,
         {
           provide: getRepositoryToken(Crop),
-          useFactory: mockCropRepository,
+          useValue: mockCropRepository,
         },
         {
           provide: getRepositoryToken(Harvest),
-          useFactory: mockHarvestRepository,
+          useValue: mockHarvestRepository,
         },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<CropService>(CropService);
-    cropRepository = module.get(getRepositoryToken(Crop));
-    harvestRepository = module.get(getRepositoryToken(Harvest));
-  });
+    service = module.get<CropService>(CropService)
+    cropRepository = module.get(getRepositoryToken(Crop))
+    harvestRepository = module.get(getRepositoryToken(Harvest))
+  })
 
-const mockHarvest = {
-  id: 'uuid-harvest-1',
-  name: 'Safra Verão',
-  crops: [],
-  farm: {
-    id: 'uuid-farm-1',
-    name: 'Fazenda Primavera',
-    city: 'Uberlândia',
-    state: 'MG',
-    totalArea: 100,
-    agriculturalArea: 60,
-    vegetationArea: 40,
-    producer: {
-      id: 'uuid-producer-1',
-      name: 'João da Silva',
-      document: '123.456.789-00',
-      farms: [],
-    },
-    harvests: [],
-  },
-} as Harvest;
+  it("should be defined", () => {
+    expect(service).toBeDefined()
+  })
 
-  const mockCrop = {
-    id: 'uuid-crop-1',
-    name: 'Milho',
-    harvest: mockHarvest,
-  } as Crop;
+  describe("create", () => {
+    it("should create a crop", async () => {
+      const createCropDto: CreateCropDto = {
+        name: "Milho",
+        harvestId: "uuid-harvest-1",
+      }
 
-  describe('create', () => {
-    it('should create and return a crop', async () => {
-      const dto = { name: 'Milho', harvestId: mockHarvest.id };
-      harvestRepository.findOne.mockResolvedValue(mockHarvest);
-      cropRepository.create.mockReturnValue(mockCrop);
-      cropRepository.save.mockResolvedValue(mockCrop);
+      harvestRepository.findOne.mockResolvedValue(mockHarvest)
+      cropRepository.create.mockReturnValue(mockCrop)
+      cropRepository.save.mockResolvedValue(mockCrop)
 
-      const result = await service.create(dto);
+      const result = await service.create(createCropDto)
 
-      expect(harvestRepository.findOne).toHaveBeenCalledWith({ where: { id: dto.harvestId } });
-      expect(result).toEqual(mockCrop);
-    });
+      expect(result).toEqual(mockCrop)
+      expect(harvestRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-harvest-1" } })
+      expect(cropRepository.create).toHaveBeenCalledWith({
+        name: "Milho",
+        harvest: mockHarvest,
+      })
+      expect(cropRepository.save).toHaveBeenCalledWith(mockCrop)
+    })
+  })
 
-    it('should throw NotFoundException if harvest not found', async () => {
-      harvestRepository.findOne.mockResolvedValue(null);
+  describe("findAll", () => {
+    it("should return all crops", async () => {
+      const crops = [mockCrop]
+      cropRepository.find.mockResolvedValue(crops)
 
-      await expect(service.create({ name: 'Milho', harvestId: 'invalid-id' }))
-        .rejects
-        .toThrow(NotFoundException);
-    });
-  });
+      const result = await service.findAll()
 
-  describe('findAll', () => {
-    it('should return all crops', async () => {
-      cropRepository.find.mockResolvedValue([mockCrop]);
+      expect(result).toEqual(crops)
+      expect(cropRepository.find).toHaveBeenCalledWith({
+        relations: ["harvest"],
+      })
+    })
+  })
 
-      const result = await service.findAll();
+  describe("findOne", () => {
+    it("should return a single crop by id", async () => {
+      cropRepository.findOne.mockResolvedValue(mockCrop)
 
-      expect(result).toEqual([mockCrop]);
-    });
-  });
+      const result = await service.findOne("uuid-crop-1")
 
-  describe('findOne', () => {
-    it('should return a crop by id', async () => {
-      cropRepository.findOne.mockResolvedValue(mockCrop);
+      expect(result).toEqual(mockCrop)
+      expect(cropRepository.findOne).toHaveBeenCalledWith({
+        where: { id: "uuid-crop-1" },
+        relations: ["harvest"],
+      })
+    })
 
-      const result = await service.findOne(mockCrop.id);
+    it("should throw NotFoundException if crop not found", async () => {
+      cropRepository.findOne.mockResolvedValue(null)
 
-      expect(result).toEqual(mockCrop);
-    });
+      await expect(service.findOne("invalid-id")).rejects.toThrow(NotFoundException)
+    })
+  })
 
-    it('should throw NotFoundException if crop not found', async () => {
-      cropRepository.findOne.mockResolvedValue(null);
+  describe("update", () => {
+    it("should update and return the crop", async () => {
+      const updateCropDto: UpdateCropDto = { name: "Milho Atualizado" }
+      const updatedCrop = { ...mockCrop, name: "Milho Atualizado" }
 
-      await expect(service.findOne('invalid-id')).rejects.toThrow(NotFoundException);
-    });
-  });
+      cropRepository.findOne.mockResolvedValue(mockCrop)
+      cropRepository.save.mockResolvedValue(updatedCrop)
 
-  describe('update', () => {
-    it('should update and return the crop', async () => {
-      const updateDto = { name: 'Soja' };
-      cropRepository.preload.mockResolvedValue({ ...mockCrop, ...updateDto });
-      cropRepository.save.mockResolvedValue({ ...mockCrop, ...updateDto });
+      const result = await service.update("uuid-crop-1", updateCropDto)
 
-      const result = await service.update(mockCrop.id, updateDto);
+      expect(result).toEqual(updatedCrop)
+      expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-crop-1" } })
+      expect(cropRepository.save).toHaveBeenCalled()
+    })
 
-      expect(result).toEqual({ ...mockCrop, ...updateDto });
-    });
+    it("should throw NotFoundException if crop to update not found", async () => {
+      const updateCropDto: UpdateCropDto = { name: "Milho Atualizado" }
 
-    it('should throw NotFoundException if crop to update not found', async () => {
-      cropRepository.preload.mockResolvedValue(undefined);
+      cropRepository.findOne.mockResolvedValue(null)
 
-      await expect(service.update('invalid-id', { name: 'Arroz' }))
-        .rejects
-        .toThrow(NotFoundException);
-    });
-  });
+      await expect(service.update("invalid-id", updateCropDto)).rejects.toThrow(NotFoundException)
+      expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "invalid-id" } })
+    })
+  })
 
-  describe('remove', () => {
-    it('should remove the crop and return it', async () => {
-      cropRepository.findOne.mockResolvedValue(mockCrop);
-      cropRepository.remove.mockResolvedValue(mockCrop);
+  describe("remove", () => {
+    it("should remove the crop", async () => {
+      cropRepository.findOne.mockResolvedValue(mockCrop)
+      cropRepository.remove.mockResolvedValue(undefined)
 
-      const result = await service.remove(mockCrop.id);
+      const result = await service.remove("uuid-crop-1")
 
-      expect(result).toEqual(mockCrop);
-    });
+      expect(result).toBeUndefined()
+      expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-crop-1" } })
+      expect(cropRepository.remove).toHaveBeenCalledWith(mockCrop)
+    })
 
-    it('should throw NotFoundException if crop to remove not found', async () => {
-      cropRepository.findOne.mockResolvedValue(null);
+    it("should throw NotFoundException if crop to remove not found", async () => {
+      cropRepository.findOne.mockResolvedValue(null)
 
-      await expect(service.remove('invalid-id'))
-        .rejects
-        .toThrow(NotFoundException);
-    });
-  });
-});
+      await expect(service.remove("invalid-id")).rejects.toThrow(NotFoundException)
+      expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "invalid-id" } })
+    })
+  })
+})

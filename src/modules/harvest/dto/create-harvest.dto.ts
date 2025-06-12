@@ -18,6 +18,7 @@ export class CreateHarvestDto {
   type: [CreateCropDto],
   description: 'Lista de culturas (crops) pertencentes à safra',
   })
+  
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateCropDto)

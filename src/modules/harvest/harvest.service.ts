@@ -42,6 +42,7 @@ export class HarvestService {
     const harvest = this.harvestRepository.create({
       name: dto.name,
       farm,
+      crops: dto.crops || [],
     });
 
     return this.harvestRepository.save(harvest);
