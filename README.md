@@ -13,47 +13,6 @@ API backend desenvolvida em NestJS para gerenciamento agrícola, incluindo módu
 - **Class Validator** (Validação de dados)
 - **Class Transformer** (Transformação de dados)
 
-## Estrutura do projeto
-
-\`\`\`
-src/
-├── modules/
-│   ├── producer/          # Módulo de produtores rurais
-│   │   ├── dto/           # Data Transfer Objects
-│   │   ├── entities/      # Entidades do banco de dados
-│   │   ├── tests/         # Testes unitários
-│   │   ├── producer.controller.ts
-│   │   ├── producer.service.ts
-│   │   └── producer.module.ts
-│   ├── farm/              # Módulo de fazendas
-│   │   ├── dto/
-│   │   ├── entities/
-│   │   ├── tests/
-│   │   ├── farm.controller.ts
-│   │   ├── farm.service.ts
-│   │   └── farm.module.ts
-│   ├── harvest/           # Módulo de safras
-│   │   ├── dto/
-│   │   ├── entities/
-│   │   ├── tests/
-│   │   ├── harvest.controller.ts
-│   │   ├── harvest.service.ts
-│   │   └── harvest.module.ts
-│   └── crop/              # Módulo de culturas
-│       ├── dto/
-│       ├── entities/
-│       ├── tests/
-│       ├── crop.controller.ts
-│       ├── crop.service.ts
-│       └── crop.module.ts
-├── common/                # Código compartilhado e utilitários
-├── config/                # Configuração do ambiente e banco de dados
-├── app.module.ts          # Módulo principal da aplicação
-└── main.ts                # Ponto de entrada da aplicação
-test/
-├── setup.ts               # Configuração global dos testes
-└── jest.config.js         # Configuração do Jest
-\`\`\`
 
 ## Funcionalidades
 
