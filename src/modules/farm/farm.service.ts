@@ -29,13 +29,14 @@ export class FarmService {
     });
 
     if (!producer) {
+      this.logger.error(`Produtor com ID ${dto.producerId} não encontrado.`);
       throw new NotFoundException('Produtor informado não foi encontrado.');
     }
 
-    this.logger.log(`condição verdadeira? ${dto.totalArea < (dto.agriculturalArea + dto.vegetationArea)}`);
     if (
       dto.totalArea < (dto.agriculturalArea + dto.vegetationArea)
     ) {
+      this.logger.error(`A soma das áreas agrícola e de vegetação não pode ser maior que a área total.`);
       throw new BadRequestException(
         'A soma das áreas agrícola e de vegetação não pode ser maior que a área total.',
       );
@@ -71,6 +72,7 @@ export class FarmService {
     });
 
     if (!farm) {
+      this.logger.error(`Fazenda com ID ${id} não encontrada.`);
       throw new NotFoundException('Fazenda não encontrada.');
     }
 
@@ -80,6 +82,7 @@ export class FarmService {
   async update(id: string, dto: UpdateFarmDto): Promise<Farm> {
   const existingFarm = await this.farmRepository.findOne({ where: { id } });
   if (!existingFarm) {
+    this.logger.error(`Fazenda com ID ${id} não encontrada.`);
     throw new NotFoundException(`Fazenda não encontrada.`);
   }
 
@@ -89,6 +92,7 @@ export class FarmService {
     const foundProducer = await this.producerRepository.findOne({ where: { id: dto.producerId } });
 
     if (!foundProducer) {
+      this.logger.error(`Produtor com ID ${dto.producerId} não encontrado.`);
       throw new NotFoundException(`Produtor não encontrado.`);
     }
 
@@ -99,7 +103,10 @@ export class FarmService {
     const agriculturalArea = dto.agriculturalArea ?? existingFarm.agriculturalArea;
     const vegetationArea = dto.vegetationArea ?? existingFarm.vegetationArea;
 
-  if (agriculturalArea + vegetationArea > totalArea) {
+    if (agriculturalArea + vegetationArea > totalArea) {
+    this.logger.error(
+      `A soma da área agricultável (${agriculturalArea}) e da área de vegetação (${vegetationArea}) não pode ser maior que a área total (${totalArea}).`,
+    );
     throw new BadRequestException(
       'A soma da área agricultável e da área de vegetação não pode ser maior que a área total.',
     );
@@ -112,6 +119,7 @@ export class FarmService {
   });
 
   if (!updatedFarm) {
+    this.logger.error(`Erro ao atualizar a fazenda com ID ${id}.`);
     throw new InternalServerErrorException(`Erro ao atualizar a fazenda.`);
   }
 
@@ -122,6 +130,7 @@ export class FarmService {
   async remove(id: string): Promise<void> {
     const farm = await this.findOne(id);
     if (!farm) {
+      this.logger.error(`Fazenda com ID ${id} não encontrada.`);
       throw new NotFoundException('Fazenda não encontrada.');
     }
 

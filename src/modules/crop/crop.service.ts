@@ -3,6 +3,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,6 +13,8 @@ import { UpdateCropDto } from './dto/update-crop.dto';
 
 @Injectable()
 export class CropService {
+  private readonly logger = new Logger(CropService.name);
+
   constructor(
     @InjectRepository(Crop)
     private readonly cropRepository: Repository<Crop>,
@@ -23,6 +26,7 @@ export class CropService {
     });
 
     if (existing) {
+      this.logger.error(`Cultura com nome ${dto.name} já existe.`);
       throw new ConflictException('Já existe uma cultura com esse nome.');
     }
     const crop = this.cropRepository.create({
@@ -43,6 +47,7 @@ export class CropService {
     });
 
     if (!crop) {
+      this.logger.error(`Cultura com ID ${id} não encontrada.`);
       throw new NotFoundException(`Cultura não encontrada.`);
     }
 
@@ -61,6 +66,7 @@ export class CropService {
     const crop = await this.cropRepository.findOne({ where: { id } });
 
     if (!crop) {
+      this.logger.error(`Cultura com ID ${id} não encontrada.`);
       throw new NotFoundException('Cultura não encontrada.');
     }
 
@@ -77,6 +83,7 @@ export class CropService {
     const crop = await this.cropRepository.findOne({ where: { id } });
 
     if (!crop) {
+      this.logger.error(`Cultura com ID ${id} não encontrada.`);
       throw new NotFoundException('Cultura não encontrada.');
     }
 

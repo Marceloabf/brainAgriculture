@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,6 +16,8 @@ import { Crop } from '../crop/entities/crop.entity';
 
 @Injectable()
 export class HarvestService {
+  private readonly logger = new Logger(HarvestService.name);
+
   constructor(
     @InjectRepository(Harvest)
     private readonly harvestRepository: Repository<Harvest>,
@@ -73,6 +76,7 @@ export class HarvestService {
     });
 
     if (!harvest) {
+      this.logger.error(`Safra com ID ${id} não encontrada.`);
       throw new NotFoundException('Safra não encontrada.');
     }
 
@@ -86,12 +90,14 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
   });
 
   if (!harvest) {
+    this.logger.error(`Safra com ID ${id} não encontrada.`);
     throw new NotFoundException('Safra não encontrada.');
   }
 
   if (dto.farmId) {
     const farm = await this.farmRepository.findOneBy({ id: dto.farmId });
     if (!farm) {
+      this.logger.error(`Fazenda com ID ${dto.farmId} não encontrada.`);
       throw new NotFoundException('Nova fazenda associada não foi encontrada.');
     }
     harvest.farm = farm;
@@ -101,6 +107,7 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
     const farmId = dto.farmId ?? harvest.farm?.id;
 
     if (!farmId) {
+      this.logger.error('Tentativa de validar nome de safra sem um ID de fazenda.');
       throw new BadRequestException('Não é possível validar o nome sem um ID de fazenda.');
     }
 
@@ -112,6 +119,7 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
     });
 
     if (conflict && conflict.id !== id) {
+      this.logger.error(`Já existe uma safra com o nome "${dto.name}" para a fazenda com ID ${farmId}.`);
       throw new ConflictException('Já existe uma safra com esse nome para esta fazenda.');
     }
 
@@ -125,6 +133,7 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
     const harvest = await this.harvestRepository.findOneBy({ id });
 
     if (!harvest) {
+      this.logger.error(`Safra com ID ${id} não encontrada.`);
       throw new NotFoundException('Safra não encontrada.');
     }
 

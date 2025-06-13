@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateProducerDto } from './dto/create-producer.dto';
@@ -11,6 +12,7 @@ import { Producer } from './entities/producer.entity';
 
 @Injectable()
 export class ProducerService {
+  private readonly logger = new Logger(ProducerService.name)
   constructor(
     @InjectRepository(Producer)
     private readonly producerRepository: Repository<Producer>,
@@ -22,6 +24,9 @@ export class ProducerService {
     });
 
     if (existingProducer) {
+      this.logger.error(
+        `Produtor com documento ${dto.document} já existe.`,
+      );
       throw new ConflictException(
         'Já existe um produtor com esse documento (CPF ou CNPJ).',
       );
@@ -42,6 +47,7 @@ export class ProducerService {
     });
 
     if (!producer) {
+      this.logger.error(`Produtor com ID ${id} não encontrado.`);
       throw new NotFoundException('Produtor não encontrado');
     }
 
