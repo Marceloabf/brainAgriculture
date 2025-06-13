@@ -57,25 +57,11 @@ npm install
 
 3. **Configure variáveis de ambiente:**
 Copie e edite o `.env.example` para `.env`:
-\`\`\`env
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=seu_usuario
-DATABASE_PASSWORD=sua_senha
-DATABASE_NAME=brain_agriculture
-DATABASE_SYNCHRONIZE=true
-\`\`\`
+
 
 4. **Configure o banco de dados:**
-Certifique-se de que o PostgreSQL está rodando e crie o banco de dados:
-\`\`\`sql
-CREATE DATABASE brain_agriculture;
-\`\`\`
+Certifique-se de que o PostgreSQL está rodando e funcionando.
 
-5. **Execute as migrations (se aplicável):**
-\`\`\`bash
-npm run typeorm migration:run
-\`\`\`
 
 6. **Rode a aplicação:**
 \`\`\`bash
@@ -101,15 +87,11 @@ npm run test:watch
 # Testes com cobertura
 npm run test:cov
 
-# Testes end-to-end
-npm run test:e2e
-\`\`\`
 
 ### Estrutura dos testes
 - **Testes unitários**: Cada service possui seus testes em `src/modules/*/tests/`
 - **Configuração**: Arquivo `test/setup.ts` com configurações globais
 - **Mocks**: Repositórios mockados para isolamento dos testes
-- **Cobertura**: Relatórios de cobertura gerados na pasta `coverage/`
 
 ### Configuração do Jest
 O projeto utiliza uma configuração customizada do Jest:
@@ -166,7 +148,7 @@ O projeto utiliza uma configuração customizada do Jest:
 
 ### Relacionamentos
 \`\`\`
-Producer (1) ←→ (N) Farm (1) ←→ (N) Harvest (1) ←→ (N) Crop
+Producer (1) ←→ (N) Farm (1) ←→ (N) Harvest (N) ←→ (N) Crop
 \`\`\`
 
 ## Troubleshooting
