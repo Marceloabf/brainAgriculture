@@ -2,34 +2,31 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Crop } from './entities/crop.entity';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { UpdateCropDto } from './dto/update-crop.dto';
-import { Harvest } from './../harvest/entities/harvest.entity';
 
 @Injectable()
 export class CropService {
   constructor(
     @InjectRepository(Crop)
     private readonly cropRepository: Repository<Crop>,
-
-    @InjectRepository(Harvest)
-    private readonly harvestRepository: Repository<Harvest>,
   ) {}
 
   async create(dto: CreateCropDto): Promise<Crop> {
-    const harvest = await this.harvestRepository.findOne({ where: { id: dto.harvestId } });
+    const existing = await this.cropRepository.findOne({
+      where: { name: dto.name },
+    });
 
-    if (!harvest) {
-      throw new NotFoundException('Safra informada não encontrada.');
+    if (existing) {
+      throw new ConflictException('Já existe uma cultura com esse nome.');
     }
-
     const crop = this.cropRepository.create({
       name: dto.name,
-      harvest,
     });
 
     try {
@@ -40,17 +37,17 @@ export class CropService {
   }
 
   async findOne(id: string): Promise<Crop> {
-  const crop = await this.cropRepository.findOne({
-    where: { id },
-    relations: ['harvest'], 
-  });
+    const crop = await this.cropRepository.findOne({
+      where: { id },
+      relations: ['harvest'],
+    });
 
-  if (!crop) {
-    throw new NotFoundException(`Cultura com ID '${id}' não encontrada.`);
+    if (!crop) {
+      throw new NotFoundException(`Cultura não encontrada.`);
+    }
+
+    return crop;
   }
-
-  return crop;
-}
 
   async findAll(): Promise<Crop[]> {
     try {

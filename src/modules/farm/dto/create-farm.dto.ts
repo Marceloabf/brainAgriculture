@@ -19,7 +19,7 @@ export class CreateFarmDto {
 
   @ApiProperty({ example: 100 })
   @IsNumber()
-  @Min(0)
+  @Min(1)
   totalArea: number;
 
   @ApiProperty({ example: 50 })

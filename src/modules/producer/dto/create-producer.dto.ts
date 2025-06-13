@@ -14,11 +14,6 @@ export class CreateProducerDto {
   @Matches(/^(\d{11}|\d{14})$/, { message: 'Documento deve ser CPF (11 dígitos) ou CNPJ (14 dígitos)' })
   document: string;
 
-  @ApiProperty({
-  type: [CreateFarmDto],
-  required: false,
-  description: 'Lista de fazendas vinculadas ao produtor',
-  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

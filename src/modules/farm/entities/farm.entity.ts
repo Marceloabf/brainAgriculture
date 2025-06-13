@@ -31,7 +31,7 @@ export class Farm {
   @Column('float')
   vegetationArea: number;
 
-  @ManyToOne(() => Producer, (producer) => producer.farms)
+  @ManyToOne(() => Producer, (producer) => producer.farms, { onDelete: 'CASCADE' })
   producer: Producer;
 
   @OneToMany(() => Harvest, (harvest) => harvest.farm, { cascade: true })

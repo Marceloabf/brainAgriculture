@@ -1,9 +1,8 @@
 import { Test, type TestingModule } from "@nestjs/testing"
 import { getRepositoryToken } from "@nestjs/typeorm"
-import { NotFoundException } from "@nestjs/common"
+import { NotFoundException, ConflictException, InternalServerErrorException } from "@nestjs/common"
 import { CropService } from "../crop.service"
 import { Crop } from "../entities/crop.entity"
-import { Harvest } from "src/modules/harvest/entities/harvest.entity"
 import type { CreateCropDto } from "../dto/create-crop.dto"
 import type { UpdateCropDto } from "../dto/update-crop.dto"
 import { jest } from "@jest/globals"
@@ -11,52 +10,25 @@ import { jest } from "@jest/globals"
 describe("CropService", () => {
   let service: CropService
   let cropRepository: any
-  let harvestRepository: any
-
-  const mockHarvest = {
-    id: "uuid-harvest-1",
-    name: "Safra Verão",
-    farm: {
-      id: "uuid-farm-1",
-      name: "Fazenda Primavera",
-      city: "Uberlândia",
-      state: "MG",
-      totalArea: 100,
-      agriculturalArea: 60,
-      vegetationArea: 40,
-      producer: {
-        id: "uuid-producer-1",
-        name: "João da Silva",
-        document: "123.456.789-00",
-        farms: [],
-      },
-      harvests: [],
-    },
-    crops: [],
-  }
 
   const mockCrop = {
     id: "uuid-crop-1",
     name: "Milho",
-    harvest: mockHarvest,
   }
 
   beforeEach(async () => {
+    jest.clearAllMocks()
+
     const mockCropRepository = {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
-      findOne: jest.fn(), 
+      findOne: jest.fn(),
       findOneBy: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
       remove: jest.fn(),
       preload: jest.fn(),
-    }
-
-    const mockHarvestRepository = {
-      findOne: jest.fn(),
-      findOneBy: jest.fn(),
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -66,16 +38,11 @@ describe("CropService", () => {
           provide: getRepositoryToken(Crop),
           useValue: mockCropRepository,
         },
-        {
-          provide: getRepositoryToken(Harvest),
-          useValue: mockHarvestRepository,
-        },
       ],
     }).compile()
 
     service = module.get<CropService>(CropService)
     cropRepository = module.get(getRepositoryToken(Crop))
-    harvestRepository = module.get(getRepositoryToken(Harvest))
   })
 
   it("should be defined", () => {
@@ -86,22 +53,47 @@ describe("CropService", () => {
     it("should create a crop", async () => {
       const createCropDto: CreateCropDto = {
         name: "Milho",
-        harvestId: "uuid-harvest-1",
       }
 
-      harvestRepository.findOne.mockResolvedValue(mockHarvest)
+      cropRepository.findOne.mockResolvedValue(null)
       cropRepository.create.mockReturnValue(mockCrop)
       cropRepository.save.mockResolvedValue(mockCrop)
 
       const result = await service.create(createCropDto)
 
       expect(result).toEqual(mockCrop)
-      expect(harvestRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-harvest-1" } })
+      expect(cropRepository.findOne).toHaveBeenCalledWith({
+        where: { name: "Milho" },
+      })
       expect(cropRepository.create).toHaveBeenCalledWith({
         name: "Milho",
-        harvest: mockHarvest,
       })
       expect(cropRepository.save).toHaveBeenCalledWith(mockCrop)
+    })
+
+    it("should throw ConflictException if crop with same name exists", async () => {
+      const createCropDto: CreateCropDto = {
+        name: "Milho",
+      }
+
+      cropRepository.findOne.mockResolvedValue(mockCrop) 
+
+      await expect(service.create(createCropDto)).rejects.toThrow(ConflictException)
+      expect(cropRepository.findOne).toHaveBeenCalledWith({
+        where: { name: "Milho" },
+      })
+    })
+
+    it("should throw InternalServerErrorException if save fails", async () => {
+      const createCropDto: CreateCropDto = {
+        name: "Milho",
+      }
+
+      cropRepository.findOne.mockResolvedValue(null)
+      cropRepository.create.mockReturnValue(mockCrop)
+      cropRepository.save.mockRejectedValue(new Error("Database error"))
+
+      await expect(service.create(createCropDto)).rejects.toThrow(InternalServerErrorException)
     })
   })
 
@@ -116,6 +108,14 @@ describe("CropService", () => {
       expect(cropRepository.find).toHaveBeenCalledWith({
         relations: ["harvest"],
       })
+    })
+
+    it("should throw InternalServerErrorException if find fails", async () => {
+      cropRepository.find.mockImplementation(() => {
+        throw new Error("Database error")
+      })
+
+      await expect(service.findAll()).rejects.toThrow(InternalServerErrorException)
     })
   })
 
@@ -162,6 +162,17 @@ describe("CropService", () => {
       await expect(service.update("invalid-id", updateCropDto)).rejects.toThrow(NotFoundException)
       expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "invalid-id" } })
     })
+
+    it("should throw InternalServerErrorException if save fails", async () => {
+      const updateCropDto: UpdateCropDto = { name: "Milho Atualizado" }
+
+      cropRepository.findOne.mockResolvedValue(mockCrop)
+      cropRepository.save.mockImplementation(() => {
+        throw new Error("Database error")
+      })
+
+      await expect(service.update("uuid-crop-1", updateCropDto)).rejects.toThrow(InternalServerErrorException)
+    })
   })
 
   describe("remove", () => {
@@ -171,7 +182,7 @@ describe("CropService", () => {
 
       const result = await service.remove("uuid-crop-1")
 
-      expect(result).toBeUndefined()
+      expect(result).toBeUndefined() 
       expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-crop-1" } })
       expect(cropRepository.remove).toHaveBeenCalledWith(mockCrop)
     })
@@ -181,6 +192,15 @@ describe("CropService", () => {
 
       await expect(service.remove("invalid-id")).rejects.toThrow(NotFoundException)
       expect(cropRepository.findOne).toHaveBeenCalledWith({ where: { id: "invalid-id" } })
+    })
+
+    it("should throw InternalServerErrorException if remove fails", async () => {
+      cropRepository.findOne.mockResolvedValue(mockCrop)
+      cropRepository.remove.mockImplementation(() => {
+        throw new Error("Database error")
+      })
+
+      await expect(service.remove("uuid-crop-1")).rejects.toThrow(InternalServerErrorException)
     })
   })
 })

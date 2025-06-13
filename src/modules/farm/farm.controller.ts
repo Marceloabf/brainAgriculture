@@ -1,28 +1,28 @@
 import {
-  Controller,
-  NotFoundException,
   BadRequestException,
-  Post,
-  Get,
-  Put,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Put,
+  UsePipes,
+  ValidationPipe
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Farm } from './entities/farm.entity';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Farm } from './entities/farm.entity';
+import { FarmService } from './farm.service';
 
 @ApiTags('farms')
 @Controller('farms')
+@UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 export class FarmController {
-  constructor(
-    @InjectRepository(Farm)
-    private readonly farmRepository: Repository<Farm>,
-  ) {}
+  private readonly logger = new Logger(FarmController.name);
+  constructor(private readonly farmService: FarmService) {}
 
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Fazenda' })
@@ -30,21 +30,14 @@ export class FarmController {
   @ApiResponse({ status: 400, description: 'A soma das áreas agrícola e de vegetação não pode ser maior que a área total.' })
   @ApiResponse({ status: 404, description: 'Produtor não encontrado.' })
   async create(@Body() createFarmDto: CreateFarmDto): Promise<Farm> {
-    try {
-      const farm = this.farmRepository.create(createFarmDto);
-      return await this.farmRepository.save(farm);
-    } catch (error) {
-      throw new BadRequestException('Erro ao criar a fazenda.');
-    }
+    return await this.farmService.create(createFarmDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todas as Fazendas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
   async findAll(): Promise<Farm[]> {
-    return await this.farmRepository.find({
-      relations: ['producer', 'harvests'],
-    });
+    return await this.farmService.findAll();
   }
 
   @Get(':id')
@@ -52,16 +45,7 @@ export class FarmController {
   @ApiResponse({ status: 200, description: 'Fazenda encontrada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Fazenda não encontrada.' })
   async findOne(@Param('id') id: string): Promise<Farm> {
-    const farm = await this.farmRepository.findOne({
-      where: { id },
-      relations: ['producer', 'harvests'],
-    });
-
-    if (!farm) {
-      throw new NotFoundException(`Fazenda com id ${id} não encontrada.`);
-    }
-
-    return farm;
+    return await this.farmService.findOne(id);
   }
 
   @Put(':id')
@@ -74,15 +58,7 @@ export class FarmController {
     @Param('id') id: string,
     @Body() updateFarmDto: UpdateFarmDto,
   ): Promise<Farm> {
-    const farm = await this.findOne(id);
-
-    Object.assign(farm, updateFarmDto);
-
-    try {
-      return await this.farmRepository.save(farm);
-    } catch (error) {
-      throw new BadRequestException('Erro ao atualizar a fazenda.');
-    }
+    return await this.farmService.update(id, updateFarmDto);
   }
 
   @Delete(':id')
@@ -91,11 +67,6 @@ export class FarmController {
   @ApiResponse({ status: 404, description: 'Fazenda não encontrada.' })
   @ApiResponse({ status: 500, description: 'Erro ao remover a fazenda.' })
   async remove(@Param('id') id: string): Promise<void> {
-    const farm = await this.findOne(id);
-    try {
-      await this.farmRepository.remove(farm);
-    } catch (error) {
-      throw new BadRequestException('Erro ao deletar a fazenda.');
-    }
+    await this.farmService.remove(id);
   }
 }

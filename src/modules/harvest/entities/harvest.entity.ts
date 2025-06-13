@@ -3,7 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Farm } from 'src/modules/farm/entities/farm.entity';
 import { Crop } from 'src/modules/crop/entities/crop.entity';
@@ -19,6 +20,7 @@ export class Harvest {
   @ManyToOne(() => Farm, (farm) => farm.harvests)
   farm: Farm;
 
-  @OneToMany(() => Crop, (crop) => crop.harvest, { cascade: true })
+  @ManyToMany(() => Crop, (crop) => crop.harvest)
+  @JoinTable()
   crops: Crop[];
 }

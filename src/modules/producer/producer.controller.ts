@@ -29,23 +29,14 @@ export class ProducerController {
   @ApiResponse({ status: 409, description: 'Já existe um produtor com esse documento (CPF ou CNPJ).' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   async create(@Body() dto: CreateProducerDto) {
-    const producer = await this.producerService.create(dto);
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Produtor criado com sucesso.',
-      data: producer,
-    };
+    return await this.producerService.create(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os Produtores' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
   async findAll() {
-    const producers = await this.producerService.findAll();
-    return {
-      statusCode: HttpStatus.OK,
-      data: producers,
-    };
+    return await this.producerService.findAll();
   }
 
   @Get(':id')
@@ -53,14 +44,7 @@ export class ProducerController {
   @ApiResponse({ status: 200, description: 'Produtor encontrado com sucesso.' })
   @ApiResponse({ status: 404, description: 'Produtor não encontrado.' })
   async findOne(@Param('id') id: string) {
-    const producer = await this.producerService.findOne(id);
-    if (!producer) {
-      throw new NotFoundException('Produtor não encontrado.');
-    }
-    return {
-      statusCode: HttpStatus.OK,
-      data: producer,
-    };
+   return await this.producerService.findOne(id);
   }
 
   @Put(':id')
@@ -69,12 +53,7 @@ export class ProducerController {
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 404, description: 'Produtor não encontrado.' })
   async update(@Param('id') id: string, @Body() dto: UpdateProducerDto) {
-    const updated = await this.producerService.update(id, dto);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Produtor atualizado com sucesso.',
-      data: updated,
-    };
+    return await this.producerService.update(id, dto);
   }
 
   @Delete(':id')
@@ -83,6 +62,6 @@ export class ProducerController {
   @ApiResponse({ status: 404, description: 'Produtor não encontrado.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    await this.producerService.remove(id);
+    return await this.producerService.remove(id);
   }
 }

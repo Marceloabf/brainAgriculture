@@ -3,6 +3,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +14,7 @@ import { UpdateFarmDto } from './dto/update-farm.dto';
 
 @Injectable()
 export class FarmService {
+  private readonly logger = new Logger(FarmService.name)
   constructor(
     @InjectRepository(Farm)
     private readonly farmRepository: Repository<Farm>,
@@ -30,8 +32,9 @@ export class FarmService {
       throw new NotFoundException('Produtor informado não foi encontrado.');
     }
 
+    this.logger.log(`condição verdadeira? ${dto.totalArea < (dto.agriculturalArea + dto.vegetationArea)}`);
     if (
-      dto.totalArea < dto.agriculturalArea + dto.vegetationArea
+      dto.totalArea < (dto.agriculturalArea + dto.vegetationArea)
     ) {
       throw new BadRequestException(
         'A soma das áreas agrícola e de vegetação não pode ser maior que a área total.',
@@ -92,6 +95,16 @@ export class FarmService {
     producer = foundProducer;
   }
 
+    const totalArea = dto.totalArea ?? existingFarm.totalArea;
+    const agriculturalArea = dto.agriculturalArea ?? existingFarm.agriculturalArea;
+    const vegetationArea = dto.vegetationArea ?? existingFarm.vegetationArea;
+
+  if (agriculturalArea + vegetationArea > totalArea) {
+    throw new BadRequestException(
+      'A soma da área agricultável e da área de vegetação não pode ser maior que a área total.',
+    );
+  }
+
   const updatedFarm = await this.farmRepository.preload({
     id,
     ...dto,
@@ -103,11 +116,14 @@ export class FarmService {
   }
 
   return this.farmRepository.save(updatedFarm);
-}
+  }
 
 
   async remove(id: string): Promise<void> {
     const farm = await this.findOne(id);
+    if (!farm) {
+      throw new NotFoundException('Fazenda não encontrada.');
+    }
 
     try {
       await this.farmRepository.remove(farm);

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany } from 'typeorm';
 import { Harvest } from 'src/modules/harvest/entities/harvest.entity';
 
 @Entity()
@@ -9,6 +9,6 @@ export class Crop {
   @Column()
   name: string; 
 
-  @ManyToOne(() => Harvest, (harvest) => harvest.crops, { onDelete: 'CASCADE' })
-  harvest: Harvest;
+  @ManyToMany(() => Harvest, (harvest) => harvest.crops)
+  harvest: Harvest[];
 }

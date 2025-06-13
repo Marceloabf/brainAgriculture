@@ -13,14 +13,8 @@ export class CreateHarvestDto {
   @IsUUID()
   @IsNotEmpty()
   farmId: string;
-
-  @ApiProperty({
-  type: [CreateCropDto],
-  description: 'Lista de culturas (crops) pertencentes à safra',
-  })
   
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateCropDto)
-  crops: CreateCropDto[];
+  @IsUUID('all', { each: true })  
+  crops: string[];
 }
