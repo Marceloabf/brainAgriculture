@@ -77,7 +77,7 @@ export class FarmService {
   async update(id: string, dto: UpdateFarmDto): Promise<Farm> {
   const existingFarm = await this.farmRepository.findOne({ where: { id } });
   if (!existingFarm) {
-    throw new NotFoundException(`Fazenda com ID '${id}' não encontrada.`);
+    throw new NotFoundException(`Fazenda não encontrada.`);
   }
 
   let producer = existingFarm.producer;
@@ -86,7 +86,7 @@ export class FarmService {
     const foundProducer = await this.producerRepository.findOne({ where: { id: dto.producerId } });
 
     if (!foundProducer) {
-      throw new NotFoundException(`Produtor com ID '${dto.producerId}' não encontrado.`);
+      throw new NotFoundException(`Produtor não encontrado.`);
     }
 
     producer = foundProducer;
@@ -99,7 +99,7 @@ export class FarmService {
   });
 
   if (!updatedFarm) {
-    throw new NotFoundException(`Erro ao atualizar a fazenda. Verifique os dados.`);
+    throw new InternalServerErrorException(`Erro ao atualizar a fazenda.`);
   }
 
   return this.farmRepository.save(updatedFarm);

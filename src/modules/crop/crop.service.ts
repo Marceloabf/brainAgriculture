@@ -53,17 +53,11 @@ export class CropService {
 }
 
   async findAll(): Promise<Crop[]> {
-    return this.cropRepository.find({ relations: ['harvest'] });
-  }
-
-  async findByHarvest(harvestId: string): Promise<Crop[]> {
-    const harvest = await this.harvestRepository.findOne({ where: { id: harvestId } });
-
-    if (!harvest) {
-      throw new NotFoundException('Safra não encontrada.');
+    try {
+      return this.cropRepository.find({ relations: ['harvest'] });
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao buscar culturas.');
     }
-
-    return this.cropRepository.find({ where: { harvest: { id: harvestId } } });
   }
 
   async update(id: string, dto: UpdateCropDto): Promise<Crop> {

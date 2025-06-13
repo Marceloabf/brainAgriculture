@@ -27,7 +27,8 @@ export class FarmController {
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Fazenda' })
   @ApiResponse({ status: 201, description: 'Fazenda criada com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos.' })
+  @ApiResponse({ status: 400, description: 'A soma das áreas agrícola e de vegetação não pode ser maior que a área total.' })
+  @ApiResponse({ status: 404, description: 'Produtor não encontrado.' })
   async create(@Body() createFarmDto: CreateFarmDto): Promise<Farm> {
     try {
       const farm = this.farmRepository.create(createFarmDto);
@@ -67,7 +68,8 @@ export class FarmController {
   @ApiOperation({ summary: 'Atualizar uma Fazenda por ID' })
   @ApiResponse({ status: 200, description: 'Fazenda atualizada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  @ApiResponse({ status: 404, description: 'Fazenda não encontrada.' })
+  @ApiResponse({ status: 404, description: 'Fazenda não encontrada. || Produtor não encontrado.' })
+  @ApiResponse({ status: 500, description: 'Erro ao atualizar a fazenda.' })
   async update(
     @Param('id') id: string,
     @Body() updateFarmDto: UpdateFarmDto,
@@ -87,6 +89,7 @@ export class FarmController {
   @ApiOperation({ summary: 'Remover uma Fazenda por ID' })
   @ApiResponse({ status: 200, description: 'Fazenda removida com sucesso.' })
   @ApiResponse({ status: 404, description: 'Fazenda não encontrada.' })
+  @ApiResponse({ status: 500, description: 'Erro ao remover a fazenda.' })
   async remove(@Param('id') id: string): Promise<void> {
     const farm = await this.findOne(id);
     try {

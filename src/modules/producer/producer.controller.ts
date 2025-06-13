@@ -26,6 +26,7 @@ export class ProducerController {
   @Post()
   @ApiOperation({ summary: 'Cadastrar novo Produtor' })
   @ApiResponse({ status: 201, description: 'Produtor criado com sucesso.' })
+  @ApiResponse({ status: 409, description: 'Já existe um produtor com esse documento (CPF ou CNPJ).' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   async create(@Body() dto: CreateProducerDto) {
     const producer = await this.producerService.create(dto);

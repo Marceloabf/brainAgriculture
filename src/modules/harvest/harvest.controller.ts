@@ -26,6 +26,8 @@ export class HarvestController {
   @ApiOperation({ summary: 'Criar uma nova Safra' })
   @ApiResponse({ status: 201, description: 'Safra criada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
+  @ApiResponse({ status: 404, description: 'Fazenda não encontrada.' })
+  @ApiResponse({ status: 409, description: 'Já existe uma safra com esse nome para esta fazenda.' })
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(@Body() createHarvestDto: CreateHarvestDto) {
     return await this.harvestService.create(createHarvestDto);
@@ -50,7 +52,8 @@ export class HarvestController {
   @ApiOperation({ summary: 'Atualizar uma Safra por ID' })
   @ApiResponse({ status: 200, description: 'Safra atualizada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  @ApiResponse({ status: 404, description: 'Safra não encontrada.' })
+  @ApiResponse({ status: 404, description: 'Safra não encontrada. || Nova fazenda associada não foi encontrada.' })
+  @ApiResponse({ status: 409, description: 'Já existe uma safra com esse nome para esta fazenda.' })
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async update(
     @Param('id', ParseUUIDPipe) id: string,

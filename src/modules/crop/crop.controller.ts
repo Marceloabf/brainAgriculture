@@ -25,21 +25,24 @@ export class CropController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Criar uma nova Colheita' })
-  @ApiResponse({ status: 201, description: 'Colheita criada com sucesso.' })
+  @ApiOperation({ summary: 'Criar uma nova Cultura' })
+  @ApiResponse({ status: 201, description: 'Cultura criada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Cultura não encontrada.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
+  @ApiResponse({ status: 500, description: 'Erro ao salvar cultura.' })
   async create(@Body() createCropDto: CreateCropDto): Promise<Crop> {
     try {
       const crop = this.cropRepository.create(createCropDto);
       return await this.cropRepository.save(crop);
     } catch (error) {
-      throw new BadRequestException('Erro ao criar a safra (crop).');
+      throw new BadRequestException('Erro ao salvar a cultura.');
     }
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as Colheitas' })
+  @ApiOperation({ summary: 'Listar todas as Culturas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
+  @ApiResponse({ status: 500, description: 'Erro ao buscar as culturas.' })
   async findAll(): Promise<Crop[]> {
     return await this.cropRepository.find({
       relations: ['harvest'],
@@ -47,9 +50,9 @@ export class CropController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Buscar uma Colheita por ID' })
-  @ApiResponse({ status: 200, description: 'Colheita encontrada com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Colheita não encontrada.' })
+  @ApiOperation({ summary: 'Buscar uma Cultura por ID' })
+  @ApiResponse({ status: 200, description: 'Cultura encontrada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Cultura não encontrada.' })
   async findOne(@Param('id') id: string): Promise<Crop> {
     const crop = await this.cropRepository.findOne({
       where: { id },
@@ -64,10 +67,11 @@ export class CropController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Atualizar uma Colheita por ID' })
-  @ApiResponse({ status: 200, description: 'Colheita atualizada com sucesso.' })
+  @ApiOperation({ summary: 'Atualizar uma Cultura por ID' })
+  @ApiResponse({ status: 200, description: 'Cultura atualizada com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
-  @ApiResponse({ status: 404, description: 'Colheita não encontrada.' })
+  @ApiResponse({ status: 404, description: 'Cultura não encontrada.' })
+  @ApiResponse({ status: 500, description: 'Erro ao atualizar a cultura.'})
   async update(
     @Param('id') id: string,
     @Body() updateCropDto: UpdateCropDto,
@@ -84,9 +88,10 @@ export class CropController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remover uma Colheita por ID' })
-  @ApiResponse({ status: 200, description: 'Colheita removida com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Colheita não encontrada.' })
+  @ApiOperation({ summary: 'Remover uma Cultura por ID' })
+  @ApiResponse({ status: 200, description: 'Cultura removida com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Cultura não encontrada.'})
+  @ApiResponse({ status: 500, description: 'Erro ao remover cultura.' })
   async remove(@Param('id') id: string): Promise<void> {
     const crop = await this.findOne(id);
 
