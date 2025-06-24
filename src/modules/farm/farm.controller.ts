@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -16,6 +17,9 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { Farm } from './entities/farm.entity';
 import { FarmService } from './farm.service';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserRole } from '../user/entities/user.entity';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiTags('farms')
 @Controller('farms')
@@ -24,6 +28,8 @@ export class FarmController {
   private readonly logger = new Logger(FarmController.name);
   constructor(private readonly farmService: FarmService) {}
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Fazenda' })
   @ApiResponse({ status: 201, description: 'Fazenda criada com sucesso.' })
@@ -33,6 +39,8 @@ export class FarmController {
     return await this.farmService.create(createFarmDto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todas as Fazendas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
@@ -40,6 +48,8 @@ export class FarmController {
     return await this.farmService.findAll();
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma Fazenda por ID' })
   @ApiResponse({ status: 200, description: 'Fazenda encontrada com sucesso.' })
@@ -48,6 +58,8 @@ export class FarmController {
     return await this.farmService.findOne(id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar uma Fazenda por ID' })
   @ApiResponse({ status: 200, description: 'Fazenda atualizada com sucesso.' })
@@ -61,6 +73,8 @@ export class FarmController {
     return await this.farmService.update(id, updateFarmDto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma Fazenda por ID' })
   @ApiResponse({ status: 200, description: 'Fazenda removida com sucesso.' })

@@ -1,18 +1,21 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Crop } from './entities/crop.entity';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserRole } from '../user/entities/user.entity';
+import { CropService } from './crop.service';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { UpdateCropDto } from './dto/update-crop.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CropService } from './crop.service';
+import { Crop } from './entities/crop.entity';
 
 @ApiTags('crops')
 @Controller('crops')
@@ -21,6 +24,8 @@ export class CropController {
     private readonly cropService: CropService,
   ) {}
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Cultura' })
   @ApiResponse({ status: 201, description: 'Cultura criada com sucesso.' })
@@ -31,6 +36,8 @@ export class CropController {
     return await this.cropService.create(createCropDto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todas as Culturas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
@@ -39,6 +46,8 @@ export class CropController {
     return await this.cropService.findAll();
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma Cultura por ID' })
   @ApiResponse({ status: 200, description: 'Cultura encontrada com sucesso.' })
@@ -47,6 +56,8 @@ export class CropController {
     return await this.cropService.findOne(id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar uma Cultura por ID' })
   @ApiResponse({ status: 200, description: 'Cultura atualizada com sucesso.' })
@@ -60,6 +71,8 @@ export class CropController {
     return await this.cropService.update(id, updateCropDto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma Cultura por ID' })
   @ApiResponse({ status: 200, description: 'Cultura removida com sucesso.' })

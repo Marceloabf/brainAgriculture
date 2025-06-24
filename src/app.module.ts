@@ -8,8 +8,20 @@ import { FarmModule } from './modules/farm/farm.module';
 import { HarvestModule } from './modules/harvest/harvest.module';
 import { CropModule } from './modules/crop/crop.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig), ProducerModule, FarmModule, HarvestModule, CropModule,],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
+    ProducerModule,
+    FarmModule,
+    HarvestModule,
+    CropModule,
+    AuthModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
