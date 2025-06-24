@@ -37,11 +37,11 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async findOne(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { email } });
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
-      this.logger.error(`Usuário com email: ${email} não encontrado.`);
+      this.logger.error(`Usuário com id: ${id} não encontrado.`);
       throw new NotFoundException('Usuário não encontrado.');
     }
 

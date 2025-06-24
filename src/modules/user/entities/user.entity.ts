@@ -7,8 +7,12 @@ import {
   BeforeInsert,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserRole } from '../dto/create-user.dto';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  GESTOR = 'gestor',
+  FUNCIONARIO = 'funcionário',
+}
 @Entity('users') 
 export class User {
   @PrimaryGeneratedColumn('uuid')

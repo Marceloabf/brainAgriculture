@@ -10,11 +10,16 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserRole } from './entities/user.entity';
+import { Public } from 'src/common/decorators/public.decorator';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -22,6 +27,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @Post()
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
@@ -31,6 +37,8 @@ export class UserController {
     return await this.userService.create(dto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
@@ -38,14 +46,18 @@ export class UserController {
     return await this.userService.findAll();
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':email')
-  @ApiOperation({ summary: 'Buscar um usuário por ID' })
+  @ApiOperation({ summary: 'Buscar um usuário por Email' })
   @ApiResponse({ status: 200, description: 'Usuário encontrado com sucesso.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
-  async findOne(@Param('email') email: string) {
-    return await this.userService.findOne(email);
+  async findByEmail(@Param('email') email: string) {
+    return await this.userService.findByEmail(email);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar um usuário por ID' })
   @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
@@ -55,6 +67,8 @@ export class UserController {
     return await this.userService.update(id, dto);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um usuário por ID' })
   @ApiResponse({ status: 204, description: 'Usuário removido com sucesso.' })
