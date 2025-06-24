@@ -8,13 +8,7 @@ import {
   MaxLength,
   MinLength
 } from 'class-validator';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  PRODUTOR = 'produtor',
-  GESTOR = 'gestor',
-  FUNCIONARIO = 'funcionário',
-}
+import { UserRole } from '../entities/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'Manuel Barros' })
@@ -38,7 +32,7 @@ export class CreateUserDto {
   @ApiProperty({ example: 'funcionário' })
   @IsEnum(UserRole, {
     message:
-      'Role inválido. Os valores permitidos são: admin, produtor, gestor ou funcionário.',
+      'Role inválido. Os valores permitidos são: admin, gestor ou funcionário.',
   })
   role: UserRole;
 }
