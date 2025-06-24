@@ -6,7 +6,6 @@ import {
   Param,
   Put,
   Delete,
-  NotFoundException,
   HttpCode,
   HttpStatus,
   UsePipes,
