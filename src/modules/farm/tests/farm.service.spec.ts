@@ -178,7 +178,7 @@ describe('FarmService', () => {
     const invalidUpdateDto: UpdateFarmDto = {
       totalArea: 100,
       agriculturalArea: 70,
-      vegetationArea: 40, // 110 > 100 inválido
+      vegetationArea: 40, 
     };
 
     farmRepository.findOne.mockResolvedValue(mockFarm);

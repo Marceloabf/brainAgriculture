@@ -32,7 +32,6 @@ describe('Farm (e2e)', () => {
     server = app.getHttpServer();
     dataSource = moduleFixture.get(DataSource);
 
-    // Cria produtor manualmente no banco
     const producer = createProducer();
     const result = await dataSource.getRepository('producer').save(producer);
     producerId = result.id;
