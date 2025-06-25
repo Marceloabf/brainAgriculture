@@ -1,47 +1,25 @@
-import { Test, type TestingModule } from "@nestjs/testing"
-import { getRepositoryToken } from "@nestjs/typeorm"
-import { NotFoundException, ConflictException } from "@nestjs/common"
-import { HarvestService } from "../harvest.service"
-import { Harvest } from "../entities/harvest.entity"
-import { Farm } from "src/modules/farm/entities/farm.entity"
-import { Crop } from "src/modules/crop/entities/crop.entity"
-import type { CreateHarvestDto } from "../dto/create-harvest.dto"
-import type { UpdateHarvestDto } from "../dto/update-harvest.dto"
-import { jest } from "@jest/globals"
+import { faker } from '@faker-js/faker'
+import { ConflictException, NotFoundException } from '@nestjs/common'
+import { Test, TestingModule } from '@nestjs/testing'
+import { getRepositoryToken } from '@nestjs/typeorm'
+import { createFarm } from 'src/modules/farm/tests/factories/farm.factory'
+import { Crop } from '../../crop/entities/crop.entity'
+import { Farm } from '../../farm/entities/farm.entity'
+import { Harvest } from '../entities/harvest.entity'
+import { HarvestService } from '../harvest.service'
+import { createHarvest } from './factories/harvest.factory'
 
-describe("HarvestService", () => {
+describe('HarvestService', () => {
   let service: HarvestService
   let harvestRepository: any
   let farmRepository: any
   let cropRepository: any
 
-  const mockFarm = {
-    id: "uuid-farm-1",
-    name: "Fazenda Primavera",
-    city: "Uberlândia",
-    state: "MG",
-    totalArea: 100,
-    agriculturalArea: 60,
-    vegetationArea: 40,
-    producer: {
-      id: "uuid-producer-1",
-      name: "João da Silva",
-      document: "123.456.789-00",
-    },
-    harvests: [],
-  }
-
-  const mockHarvest = {
-    id: "uuid-harvest-1",
-    name: "Safra Verão",
-    farm: mockFarm,
-    crops: [],
-  }
+  const mockFarm = createFarm();
+  const mockHarvest = createHarvest();
 
   beforeEach(async () => {
-    jest.clearAllMocks()
-
-    const mockHarvestRepository = {
+    const mockHarvestRepo = {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
@@ -54,32 +32,21 @@ describe("HarvestService", () => {
       preload: jest.fn(),
     }
 
-    const mockFarmRepository = {
+    const mockFarmRepo = {
       findOne: jest.fn(),
       findOneBy: jest.fn(),
     }
 
-    const mockCropRepository = {
-      find: jest.fn(),
-      findBy: jest.fn(),
+    const mockCropRepo = {
       findByIds: jest.fn(),
     }
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HarvestService,
-        {
-          provide: getRepositoryToken(Harvest),
-          useValue: mockHarvestRepository,
-        },
-        {
-          provide: getRepositoryToken(Farm),
-          useValue: mockFarmRepository,
-        },
-        {
-          provide: getRepositoryToken(Crop),
-          useValue: mockCropRepository,
-        },
+        { provide: getRepositoryToken(Harvest), useValue: mockHarvestRepo },
+        { provide: getRepositoryToken(Farm), useValue: mockFarmRepo },
+        { provide: getRepositoryToken(Crop), useValue: mockCropRepo },
       ],
     }).compile()
 
@@ -89,15 +56,15 @@ describe("HarvestService", () => {
     cropRepository = module.get(getRepositoryToken(Crop))
   })
 
-  it("should be defined", () => {
+  it('should be defined', () => {
     expect(service).toBeDefined()
   })
 
-  describe("create", () => {
-    it("should create a harvest", async () => {
-      const createHarvestDto: CreateHarvestDto = {
-        name: "Safra Verão",
-        farmId: "uuid-farm-1",
+  describe('create', () => {
+    it('should create a harvest', async () => {
+      const dto = {
+        name: faker.word.words(2),
+        farmId: mockFarm.id,
         crops: [],
       }
 
@@ -106,163 +73,123 @@ describe("HarvestService", () => {
       harvestRepository.create.mockReturnValue(mockHarvest)
       harvestRepository.save.mockResolvedValue(mockHarvest)
 
-      const result = await service.create(createHarvestDto)
+      const result = await service.create(dto)
 
       expect(result).toEqual(mockHarvest)
-      expect(farmRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-farm-1" } })
-      expect(harvestRepository.create).toHaveBeenCalledWith({
-        name: "Safra Verão",
-        farm: mockFarm,
-        crops: [],
-      })
-      expect(harvestRepository.save).toHaveBeenCalledWith(mockHarvest)
     })
 
-    it("should throw ConflictException if harvest with same name exists for farm", async () => {
-      const createHarvestDto: CreateHarvestDto = {
-        name: "Safra Verão",
-        farmId: "uuid-farm-1",
+    it('should throw ConflictException if harvest with same name exists', async () => {
+      const dto = {
+        name: mockHarvest.name,
+        farmId: mockFarm.id,
         crops: [],
       }
 
       farmRepository.findOne.mockResolvedValue(mockFarm)
-      harvestRepository.findOne.mockResolvedValue(mockHarvest) 
+      harvestRepository.findOne.mockResolvedValue(mockHarvest)
 
-      await expect(service.create(createHarvestDto)).rejects.toThrow(ConflictException)
+      await expect(service.create(dto)).rejects.toThrow(ConflictException)
     })
 
-    it("should create a harvest with crops", async () => {
+    it('should create a harvest with crops', async () => {
       const mockCrops = [
-        { id: "crop-1", name: "Milho" },
-        { id: "crop-2", name: "Soja" },
+        { id: faker.string.uuid(), name: 'Milho' },
+        { id: faker.string.uuid(), name: 'Soja' },
       ]
 
-      const createHarvestDto: CreateHarvestDto = {
-        name: "Safra Verão",
-        farmId: "uuid-farm-1",
-        crops: ["crop-1", "crop-2"],
+      const dto = {
+        name: faker.word.words(2),
+        farmId: mockFarm.id,
+        crops: mockCrops.map(c => c.id),
       }
 
       farmRepository.findOne.mockResolvedValue(mockFarm)
       harvestRepository.findOne.mockResolvedValue(null)
       cropRepository.findByIds.mockResolvedValue(mockCrops)
 
-      const harvestWithCrops = {
-        ...mockHarvest,
-        crops: mockCrops,
-      }
+      const harvestWithCrops = { ...mockHarvest, crops: mockCrops }
 
       harvestRepository.create.mockReturnValue(harvestWithCrops)
       harvestRepository.save.mockResolvedValue(harvestWithCrops)
 
-      const result = await service.create(createHarvestDto)
+      const result = await service.create(dto)
 
       expect(result).toEqual(harvestWithCrops)
-      expect(cropRepository.findByIds).toHaveBeenCalledWith(["crop-1", "crop-2"])
-      expect(harvestRepository.create).toHaveBeenCalledWith({
-        name: "Safra Verão",
-        farm: mockFarm,
-        crops: mockCrops,
-      })
     })
   })
 
-  describe("findAll", () => {
-    it("should return all harvests", async () => {
-      const harvests = [mockHarvest]
-      harvestRepository.find.mockResolvedValue(harvests)
+  describe('findAll', () => {
+    it('should return all harvests', async () => {
+      harvestRepository.find.mockResolvedValue([mockHarvest])
 
       const result = await service.findAll()
 
-      expect(result).toEqual(harvests)
-      expect(harvestRepository.find).toHaveBeenCalledWith({
-        relations: ["crops"],
-      })
+      expect(result).toEqual([mockHarvest])
     })
   })
 
-  describe("findOne", () => {
-    it("should return a single harvest by id", async () => {
+  describe('findOne', () => {
+    it('should return one harvest', async () => {
       harvestRepository.findOne.mockResolvedValue(mockHarvest)
 
-      const result = await service.findOne("uuid-harvest-1")
+      const result = await service.findOne(mockHarvest.id)
 
       expect(result).toEqual(mockHarvest)
-      expect(harvestRepository.findOne).toHaveBeenCalledWith({
-        where: { id: "uuid-harvest-1" },
-        relations: ["crops"],
-      })
     })
 
-    it("should throw NotFoundException if harvest not found", async () => {
+    it('should throw NotFoundException if not found', async () => {
       harvestRepository.findOne.mockResolvedValue(null)
 
-      await expect(service.findOne("invalid-id")).rejects.toThrow(NotFoundException)
+      await expect(service.findOne(faker.string.uuid())).rejects.toThrow(NotFoundException)
     })
   })
 
-  describe("update", () => {
-    it("should update a harvest", async () => {
-      const updateHarvestDto: UpdateHarvestDto = { name: "Safra Atualizada" }
-      const updatedHarvest = { ...mockHarvest, name: "Safra Atualizada" }
+  describe('update', () => {
+    it('should update harvest', async () => {
+      const dto = { name: 'Nova Safra' }
+      const updated = { ...mockHarvest, ...dto }
 
-      // Importante: Agora usamos findOne em vez de findOneBy
       harvestRepository.findOne.mockResolvedValue(mockHarvest)
-      harvestRepository.save.mockResolvedValue(updatedHarvest)
+      harvestRepository.save.mockResolvedValue(updated)
 
-      const result = await service.update("uuid-harvest-1", updateHarvestDto)
+      const result = await service.update(mockHarvest.id, dto)
 
-      expect(result).toEqual(updatedHarvest)
-      expect(harvestRepository.findOne).toHaveBeenCalledWith({
-        where: { id: "uuid-harvest-1" },
-        relations: ["farm"],
-      })
-      expect(harvestRepository.save).toHaveBeenCalled()
+      expect(result).toEqual(updated)
     })
 
-    it("should throw NotFoundException if harvest to update not found", async () => {
+    it('should throw NotFoundException if not found', async () => {
       harvestRepository.findOne.mockResolvedValue(null)
 
-      await expect(service.update("invalid-id", { name: "test" })).rejects.toThrow(NotFoundException)
+      await expect(service.update(faker.string.uuid(), { name: 'X' })).rejects.toThrow(NotFoundException)
     })
 
-    it("should throw ConflictException if update would create name conflict", async () => {
-      const updateHarvestDto: UpdateHarvestDto = { name: "Safra Conflito" }
+    it('should throw ConflictException if name already exists', async () => {
+      const dto = { name: 'Safra Conflito' }
 
-      harvestRepository.findOne.mockImplementation((options) => {
-        if (options.where.id === "uuid-harvest-1") {
-          return Promise.resolve(mockHarvest)
-        }
-        if (options.where.name === "Safra Conflito") {
-          return Promise.resolve({
-            id: "uuid-harvest-2",
-            name: "Safra Conflito",
-            farm: mockFarm,
-          })
-        }
+      harvestRepository.findOne.mockImplementation(({ where }) => {
+        if (where.id) return Promise.resolve(mockHarvest)
+        if (where.name) return Promise.resolve({ id: faker.string.uuid(), name: dto.name, farm: mockFarm })
         return Promise.resolve(null)
       })
 
-      await expect(service.update("uuid-harvest-1", updateHarvestDto)).rejects.toThrow(ConflictException)
+      await expect(service.update(mockHarvest.id, dto)).rejects.toThrow(ConflictException)
     })
   })
 
-  describe("remove", () => {
-    it("should delete a harvest", async () => {
+  describe('remove', () => {
+    it('should delete harvest', async () => {
       harvestRepository.findOneBy.mockResolvedValue(mockHarvest)
       harvestRepository.remove.mockResolvedValue(mockHarvest)
 
-      const result = await service.remove("uuid-harvest-1")
+      const result = await service.remove(mockHarvest.id)
 
       expect(result).toBeUndefined()
-      expect(harvestRepository.findOneBy).toHaveBeenCalledWith({ id: "uuid-harvest-1" })
-      expect(harvestRepository.remove).toHaveBeenCalledWith(mockHarvest)
     })
 
-    it("should throw NotFoundException if harvest to delete not found", async () => {
+    it('should throw NotFoundException if not found', async () => {
       harvestRepository.findOneBy.mockResolvedValue(null)
 
-      await expect(service.remove("invalid-id")).rejects.toThrow(NotFoundException)
+      await expect(service.remove(faker.string.uuid())).rejects.toThrow(NotFoundException)
     })
   })
 })

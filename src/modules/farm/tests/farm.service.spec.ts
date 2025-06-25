@@ -1,40 +1,21 @@
-import { Test, type TestingModule } from "@nestjs/testing"
-import { getRepositoryToken } from "@nestjs/typeorm"
-import { NotFoundException } from "@nestjs/common"
-import { FarmService } from "../farm.service"
-import { Farm } from "../entities/farm.entity"
-import { Producer } from "src/modules/producer/entities/producer.entity"
-import type { CreateFarmDto } from "../dto/create-farm.dto"
-import type { UpdateFarmDto } from "../dto/update-farm.dto"
-import { jest } from "@jest/globals" 
+import { Test, type TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
+import { FarmService } from '../farm.service';
+import { Farm } from '../entities/farm.entity';
+import { Producer } from 'src/modules/producer/entities/producer.entity';
+import { faker } from '@faker-js/faker';
+import type { CreateFarmDto } from '../dto/create-farm.dto';
+import type { UpdateFarmDto } from '../dto/update-farm.dto';
+import { createFarm, createProducer } from './factories/farm.factory';
 
-describe("FarmService", () => {
-  let service: FarmService
-  let farmRepository: any
-  let producerRepository: any
+describe('FarmService', () => {
+  let service: FarmService;
+  let farmRepository: any;
+  let producerRepository: any;
 
-  const mockFarm = {
-    id: "uuid-farm-1",
-    name: "Fazenda Primavera",
-    city: "Uberlândia",
-    state: "MG",
-    totalArea: 100,
-    agriculturalArea: 60,
-    vegetationArea: 40,
-    producer: {
-      id: "uuid-producer-1",
-      name: "João Silva",
-      document: "12345678901",
-    },
-    harvests: [],
-  }
-
-  const mockProducer = {
-    id: "uuid-producer-1",
-    name: "João Silva",
-    document: "12345678901",
-    farms: [],
-  }
+  const mockFarm = createFarm();
+  const mockProducer = createProducer();
 
   beforeEach(async () => {
     const mockFarmRepository = {
@@ -47,12 +28,12 @@ describe("FarmService", () => {
       delete: jest.fn(),
       remove: jest.fn(),
       preload: jest.fn(),
-    }
+    };
 
     const mockProducerRepository = {
       findOne: jest.fn(),
       findOneBy: jest.fn(),
-    }
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -66,124 +47,135 @@ describe("FarmService", () => {
           useValue: mockProducerRepository,
         },
       ],
-    }).compile()
+    }).compile();
 
-    service = module.get<FarmService>(FarmService)
-    farmRepository = module.get(getRepositoryToken(Farm))
-    producerRepository = module.get(getRepositoryToken(Producer))
-  })
+    service = module.get<FarmService>(FarmService);
+    farmRepository = module.get(getRepositoryToken(Farm));
+    producerRepository = module.get(getRepositoryToken(Producer));
+  });
 
-  it("should be defined", () => {
-    expect(service).toBeDefined()
-  })
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
 
-  describe("create", () => {
-    it("should create a farm", async () => {
+  describe('create', () => {
+    it('should create a farm', async () => {
       const createFarmDto: CreateFarmDto = {
-        name: "Fazenda Primavera",
-        city: "Uberlândia",
-        state: "MG",
-        totalArea: 100,
-        agriculturalArea: 60,
-        vegetationArea: 40,
-        producerId: "uuid-producer-1",
-      }
+        name: faker.location.street(),
+        city: faker.location.city(),
+        state: faker.location.state({ abbreviated: true }),
+        totalArea: 200,
+        agriculturalArea: 120,
+        vegetationArea: 80,
+        producerId: mockProducer.id,
+      };
 
-      producerRepository.findOne.mockResolvedValue(mockProducer)
-      farmRepository.create.mockReturnValue(mockFarm)
-      farmRepository.save.mockResolvedValue(mockFarm)
+      producerRepository.findOne.mockResolvedValue(mockProducer);
+      farmRepository.create.mockReturnValue(mockFarm);
+      farmRepository.save.mockResolvedValue(mockFarm);
 
-      const result = await service.create(createFarmDto)
+      const result = await service.create(createFarmDto);
 
-      expect(result).toEqual(mockFarm)
+      expect(result).toEqual(mockFarm);
       expect(producerRepository.findOne).toHaveBeenCalledWith({
-        where: { id: "uuid-producer-1" },
-      })
+        where: { id: createFarmDto.producerId },
+      });
       expect(farmRepository.create).toHaveBeenCalledWith({
-        name: "Fazenda Primavera",
-        city: "Uberlândia",
-        state: "MG",
-        totalArea: 100,
-        agriculturalArea: 60,
-        vegetationArea: 40,
+        name: createFarmDto.name,
+        city: createFarmDto.city,
+        state: createFarmDto.state,
+        totalArea: createFarmDto.totalArea,
+        agriculturalArea: createFarmDto.agriculturalArea,
+        vegetationArea: createFarmDto.vegetationArea,
         producer: mockProducer,
-      })
-      expect(farmRepository.save).toHaveBeenCalledWith(mockFarm)
-    })
-  })
+      });
+      expect(farmRepository.save).toHaveBeenCalledWith(mockFarm);
+    });
+  });
 
-  describe("findAll", () => {
-    it("should return all farms", async () => {
-      const farms = [mockFarm]
-      farmRepository.find.mockResolvedValue(farms)
+  describe('findAll', () => {
+    it('should return all farms', async () => {
+      const farms = [mockFarm];
+      farmRepository.find.mockResolvedValue(farms);
 
-      const result = await service.findAll()
+      const result = await service.findAll();
 
-      expect(result).toEqual(farms)
+      expect(result).toEqual(farms);
       expect(farmRepository.find).toHaveBeenCalledWith({
-        relations: ["producer", "harvests"],
-      })
-    })
-  })
+        relations: ['producer', 'harvests'],
+      });
+    });
+  });
 
-  describe("findOne", () => {
-    it("should return a single farm by id", async () => {
-      farmRepository.findOne.mockResolvedValue(mockFarm)
+  describe('findOne', () => {
+    it('should return a single farm by id', async () => {
+      farmRepository.findOne.mockResolvedValue(mockFarm);
 
-      const result = await service.findOne("uuid-farm-1")
+      const result = await service.findOne(mockFarm.id);
 
-      expect(result).toEqual(mockFarm)
+      expect(result).toEqual(mockFarm);
       expect(farmRepository.findOne).toHaveBeenCalledWith({
-        where: { id: "uuid-farm-1" },
-        relations: ["producer", "harvests"],
-      })
-    })
+        where: { id: mockFarm.id },
+        relations: ['producer', 'harvests'],
+      });
+    });
 
-    it("should throw NotFoundException if farm not found", async () => {
-      farmRepository.findOne.mockResolvedValue(null)
+    it('should throw NotFoundException if farm not found', async () => {
+      farmRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne("invalid-id")).rejects.toThrow(NotFoundException)
-    })
-  })
+      await expect(service.findOne('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
-  describe("update", () => {
-    it("should update a farm", async () => {
-      const updateFarmDto: UpdateFarmDto = { name: "Fazenda Atualizada" }
-      const updatedFarm = { ...mockFarm, ...updateFarmDto }
+  describe('update', () => {
+    it('should update a farm', async () => {
+      const updateFarmDto: UpdateFarmDto = {
+        name: 'Fazenda Atualizada',
+      };
 
-      farmRepository.findOne.mockResolvedValue(mockFarm)
-      farmRepository.preload.mockResolvedValue(updatedFarm) 
-      farmRepository.save.mockResolvedValue(updatedFarm)
+      const updatedFarm = { ...mockFarm, ...updateFarmDto };
 
-      const result = await service.update("uuid-farm-1", updateFarmDto)
+      farmRepository.findOne.mockResolvedValue(mockFarm);
+      farmRepository.preload.mockResolvedValue(updatedFarm);
+      farmRepository.save.mockResolvedValue(updatedFarm);
 
-      expect(result).toEqual(updatedFarm)
-      expect(farmRepository.findOne).toHaveBeenCalledWith({ where: { id: "uuid-farm-1" } })
-      expect(farmRepository.save).toHaveBeenCalledWith(updatedFarm)
-    })
+      const result = await service.update(mockFarm.id, updateFarmDto);
 
-    it("should throw NotFoundException if farm to update not found", async () => {
-      farmRepository.findOne.mockResolvedValue(null)
+      expect(result).toEqual(updatedFarm);
+      expect(farmRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockFarm.id },
+      });
+      expect(farmRepository.save).toHaveBeenCalledWith(updatedFarm);
+    });
 
-      await expect(service.update("invalid-id", {})).rejects.toThrow(NotFoundException)
-    })
-  })
+    it('should throw NotFoundException if farm to update not found', async () => {
+      farmRepository.findOne.mockResolvedValue(null);
 
-  describe("remove", () => {
-    it("should remove a farm", async () => {
-      farmRepository.findOne.mockResolvedValue(mockFarm)
-      farmRepository.remove.mockResolvedValue(mockFarm)
+      await expect(service.update('invalid-id', {})).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
-      const result = await service.remove("uuid-farm-1")
+  describe('remove', () => {
+    it('should remove a farm', async () => {
+      farmRepository.findOne.mockResolvedValue(mockFarm);
+      farmRepository.remove.mockResolvedValue(mockFarm);
 
-      expect(result).toBeUndefined()
-      expect(farmRepository.remove).toHaveBeenCalledWith(mockFarm)
-    })
+      const result = await service.remove(mockFarm.id);
 
-    it("should throw NotFoundException if farm to delete not found", async () => {
-      farmRepository.findOne.mockResolvedValue(null)
+      expect(result).toBeUndefined();
+      expect(farmRepository.remove).toHaveBeenCalledWith(mockFarm);
+    });
 
-      await expect(service.remove("invalid-id")).rejects.toThrow(NotFoundException)
-    })
-  })
-})
+    it('should throw NotFoundException if farm to delete not found', async () => {
+      farmRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.remove('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+});

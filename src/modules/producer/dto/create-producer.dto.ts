@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString, Matches, ValidateNested, IsArray, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, ValidateNested, IsArray, IsOptional, Validate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateFarmDto } from 'src/modules/farm/dto/create-farm.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsDocumentValidator } from 'src/common/validators/is-document.validator';
 
 export class CreateProducerDto {
   @ApiProperty({ example: 'Manuel Barros' })
@@ -11,7 +12,7 @@ export class CreateProducerDto {
 
   @ApiProperty({ example: '00000000000' })
   @IsString()
-  @Matches(/^(\d{11}|\d{14})$/, { message: 'Documento deve ser CPF (11 dígitos) ou CNPJ (14 dígitos)' })
+  @Validate(IsDocumentValidator)
   document: string;
 
   @IsOptional()
