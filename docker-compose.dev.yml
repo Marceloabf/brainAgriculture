@@ -1,0 +1,5 @@
+services:
+  api:
+    env_file:
+      - ./env/.env.dev
+    command: npm run start:dev

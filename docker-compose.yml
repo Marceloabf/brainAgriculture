@@ -3,17 +3,15 @@ version: '3.8'
 services:
   api:
     build: .
-    ports:
-      - '3000:3000'
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./:/app
       - /app/node_modules
-    env_file:
-      - ./env/.env.dev
     command: npm run start:dev
+    ports:
+      - '3000:3000'
 
   db:
     image: postgres:15
