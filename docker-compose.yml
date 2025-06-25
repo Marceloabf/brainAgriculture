@@ -1,20 +1,18 @@
+version: '3.8'
+
 services:
   api:
     build: .
     ports:
       - '3000:3000'
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_DATABASE=brain_agriculture
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./:/app
       - /app/node_modules
+    env_file:
+      - ./env/.env.dev
     command: npm run start:dev
 
   db:
@@ -28,6 +26,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
