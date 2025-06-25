@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/.";
-import { Harvest } from "../../entities/harvest.entity";
-import { createFarm } from "src/modules/farm/tests/factories/farm.factory";
+import { createFarm } from "../factories/farm.factory";
+import { Harvest } from "src/modules/harvest/entities/harvest.entity";
 
 export const createHarvest = (overrides?: Partial<Harvest>): Harvest => ({
   id: faker.string.uuid(),

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CropService } from '../crop.service';
 import { Crop } from '../entities/crop.entity';
-import { createCrop } from './factories/crop.factory';
+import { createCrop } from '../../../../test/e2e/factories/crop.factory';
 import type { CreateCropDto } from '../dto/create-crop.dto';
 import type { UpdateCropDto } from '../dto/update-crop.dto';
 

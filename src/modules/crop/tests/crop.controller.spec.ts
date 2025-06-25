@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CropController } from '../crop.controller';
 import { CropService } from '../crop.service';
-import { createCrop } from './/factories/crop.factory';
+import { createCrop } from '../../../../test/e2e/factories/crop.factory';
 
 describe('CropController', () => {
   let controller: CropController;

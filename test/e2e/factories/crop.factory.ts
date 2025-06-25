@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { Crop } from '../../entities/crop.entity';
+import { Crop } from 'src/modules/crop/entities/crop.entity';
+
 
 export function createCrop(overrides?: Partial<Crop>): Crop {
   const crop = new Crop();

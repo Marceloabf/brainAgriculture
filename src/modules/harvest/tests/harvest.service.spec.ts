@@ -2,12 +2,12 @@ import { faker } from '@faker-js/faker'
 import { ConflictException, NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { createFarm } from 'src/modules/farm/tests/factories/farm.factory'
+import { createFarm } from '../../../../test/e2e/factories/farm.factory'
 import { Crop } from '../../crop/entities/crop.entity'
 import { Farm } from '../../farm/entities/farm.entity'
 import { Harvest } from '../entities/harvest.entity'
 import { HarvestService } from '../harvest.service'
-import { createHarvest } from './factories/harvest.factory'
+import { createHarvest } from '../../../../test/e2e/factories/harvest.factory'
 
 describe('HarvestService', () => {
   let service: HarvestService

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HarvestController } from '../harvest.controller';
 import { HarvestService } from '../harvest.service';
-import { createHarvest } from './factories/harvest.factory';
+import { createHarvest } from '../../../../test/e2e/factories/harvest.factory';
 import { faker } from '@faker-js/faker';
 
 describe('HarvestController', () => {

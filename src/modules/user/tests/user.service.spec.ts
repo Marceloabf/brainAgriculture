@@ -5,7 +5,7 @@ import { ObjectLiteral, Repository } from 'typeorm';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../user.service';
-import { createUserDto, createUser } from './factories/user.factory';
+import { createUserDto, createUser } from '../../../../test/e2e/factories/user.factory';
 
 type MockRepo<T extends ObjectLiteral = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 

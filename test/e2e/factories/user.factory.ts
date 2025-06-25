@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { CreateUserDto } from '../../dto/create-user.dto';
-import { User, UserRole } from '../../entities/user.entity';
+import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
+import { User, UserRole } from 'src/modules/user/entities/user.entity';
+
 
 export const createUserDto = (): CreateUserDto => ({
   name: faker.person.fullName(),

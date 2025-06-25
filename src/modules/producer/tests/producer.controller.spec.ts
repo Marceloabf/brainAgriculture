@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProducerController } from '../producer.controller';
 import { ProducerService } from '../producer.service';
-import { createProducer } from './factories/producer.factory'; 
+import { createProducer } from '../../../../test/e2e/factories/producer.factory'; 
 
 describe('ProducerController', () => {
   let controller: ProducerController;

@@ -7,7 +7,7 @@ import { Producer } from 'src/modules/producer/entities/producer.entity';
 import { faker } from '@faker-js/faker';
 import type { CreateFarmDto } from '../dto/create-farm.dto';
 import type { UpdateFarmDto } from '../dto/update-farm.dto';
-import { createFarm, createProducer } from './factories/farm.factory';
+import { createFarm, createProducer } from '../../../../test/e2e/factories/farm.factory';
 
 describe('FarmService', () => {
   let service: FarmService;

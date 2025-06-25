@@ -7,7 +7,7 @@ import type { CreateProducerDto } from "../dto/create-producer.dto"
 import type { UpdateProducerDto } from "../dto/update-producer.dto"
 import { jest } from "@jest/globals"
 import { faker } from "@faker-js/faker/."
-import { createProducer } from "./factories/producer.factory"
+import { createProducer } from "../../../../test/e2e/factories/producer.factory"
 
 describe("ProducerService", () => {
   let service: ProducerService;
