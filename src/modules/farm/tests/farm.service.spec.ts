@@ -91,6 +91,22 @@ describe('FarmService', () => {
       });
       expect(farmRepository.save).toHaveBeenCalledWith(mockFarm);
     });
+
+    it('should throw BadRequestException if agriculturalArea + vegetationArea > totalArea', async () => {
+    const invalidCreateDto: CreateFarmDto = {
+      name: faker.location.street(),
+      city: faker.location.city(),
+      state: faker.location.state({ abbreviated: true }),
+      totalArea: 100,
+      agriculturalArea: 70,
+      vegetationArea: 40, 
+      producerId: mockProducer.id,
+    };
+
+    producerRepository.findOne.mockResolvedValue(mockProducer);
+
+    await expect(service.create(invalidCreateDto)).rejects.toThrow('A soma das áreas agrícola e de vegetação não pode ser maior que a área total.');
+  });
   });
 
   describe('findAll', () => {
@@ -157,6 +173,18 @@ describe('FarmService', () => {
         NotFoundException,
       );
     });
+
+    it('should throw BadRequestException if agriculturalArea + vegetationArea > totalArea on update', async () => {
+    const invalidUpdateDto: UpdateFarmDto = {
+      totalArea: 100,
+      agriculturalArea: 70,
+      vegetationArea: 40, // 110 > 100 inválido
+    };
+
+    farmRepository.findOne.mockResolvedValue(mockFarm);
+
+    await expect(service.update(mockFarm.id, invalidUpdateDto)).rejects.toThrow('A soma da área agricultável e da área de vegetação não pode ser maior que a área total.');
+  });
   });
 
   describe('remove', () => {
