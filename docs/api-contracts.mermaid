@@ -1,0 +1,101 @@
+graph TB
+    %% API Gateway
+    API["🌐 API Gateway<br/>NestJS + JWT Auth"]
+    
+    %% Auth Module
+    AUTH["🔐 Auth Module"]
+    API --> AUTH
+    AUTH --> LOGIN["POST /auth/login<br/>📝 Public<br/>Body: email, password<br/>Response: accessToken, refreshToken"]
+    AUTH --> REFRESH["POST /auth/refresh-token<br/>📝 Public<br/>Body: refreshToken<br/>Response: accessToken"]
+    
+    %% User Module
+    USER["👤 User Module"]
+    API --> USER
+    USER --> USER_CREATE["POST /users<br/>📝 Public<br/>Body: name, email, password, role<br/>Response: User"]
+    USER --> USER_LIST["GET /users<br/>🔒 ADMIN<br/>Response: User[]"]
+    USER --> USER_GET["GET /users/:email<br/>🔒 ALL ROLES<br/>Response: User"]
+    USER --> USER_UPDATE["PUT /users/:id<br/>🔒 ADMIN<br/>Body: UpdateUserDto<br/>Response: User"]
+    USER --> USER_DELETE["DELETE /users/:id<br/>🔒 ADMIN<br/>Response: 204"]
+    
+    %% Producer Module
+    PRODUCER["🧑‍🌾 Producer Module"]
+    API --> PRODUCER
+    PRODUCER --> PROD_CREATE["POST /producers<br/>🔒 ADMIN, GESTOR<br/>Body: name, document, farms?<br/>Response: Producer"]
+    PRODUCER --> PROD_LIST["GET /producers<br/>🔒 ADMIN<br/>Response: Producer[]"]
+    PRODUCER --> PROD_GET["GET /producers/:id<br/>🔒 ADMIN, GESTOR<br/>Response: Producer"]
+    PRODUCER --> PROD_UPDATE["PUT /producers/:id<br/>🔒 ADMIN, GESTOR<br/>Body: UpdateProducerDto<br/>Response: Producer"]
+    PRODUCER --> PROD_DELETE["DELETE /producers/:id<br/>🔒 ADMIN, GESTOR<br/>Response: 204"]
+    
+    %% Farm Module
+    FARM["🏡 Farm Module"]
+    API --> FARM
+    FARM --> FARM_CREATE["POST /farms<br/>🔒 ADMIN, GESTOR<br/>Body: name, city, state, areas, producerId<br/>Response: Farm"]
+    FARM --> FARM_LIST["GET /farms<br/>🔒 ADMIN<br/>Response: Farm[]"]
+    FARM --> FARM_GET["GET /farms/:id<br/>🔒 ADMIN, GESTOR, FUNCIONARIO<br/>Response: Farm"]
+    FARM --> FARM_UPDATE["PUT /farms/:id<br/>🔒 ADMIN, GESTOR<br/>Body: UpdateFarmDto<br/>Response: Farm"]
+    FARM --> FARM_DELETE["DELETE /farms/:id<br/>🔒 ADMIN, GESTOR<br/>Response: 204"]
+    
+    %% Crop Module
+    CROP["🌱 Crop Module"]
+    API --> CROP
+    CROP --> CROP_CREATE["POST /crops<br/>🔒 ADMIN, GESTOR<br/>Body: name<br/>Response: Crop"]
+    CROP --> CROP_LIST["GET /crops<br/>🔒 ADMIN<br/>Response: Crop[]"]
+    CROP --> CROP_GET["GET /crops/:id<br/>🔒 ADMIN, GESTOR, FUNCIONARIO<br/>Response: Crop"]
+    CROP --> CROP_UPDATE["PUT /crops/:id<br/>🔒 ADMIN, GESTOR<br/>Body: UpdateCropDto<br/>Response: Crop"]
+    CROP --> CROP_DELETE["DELETE /crops/:id<br/>🔒 ADMIN, GESTOR<br/>Response: 204"]
+    
+    %% Harvest Module
+    HARVEST["🌾 Harvest Module"]
+    API --> HARVEST
+    HARVEST --> HARV_CREATE["POST /harvests<br/>🔒 ADMIN, GESTOR<br/>Body: name, farmId, crops[]<br/>Response: Harvest"]
+    HARVEST --> HARV_LIST["GET /harvests<br/>🔒 ADMIN<br/>Response: Harvest[]"]
+    HARVEST --> HARV_GET["GET /harvests/:id<br/>🔒 ADMIN, GESTOR, FUNCIONARIO<br/>Response: Harvest"]
+    HARVEST --> HARV_UPDATE["PUT /harvests/:id<br/>🔒 ADMIN, GESTOR<br/>Body: UpdateHarvestDto<br/>Response: Harvest"]
+    HARVEST --> HARV_DELETE["DELETE /harvests/:id<br/>🔒 ADMIN, GESTOR<br/>Response: 204"]
+    
+    %% System Modules
+    SYSTEM["⚙️ System Modules"]
+    API --> SYSTEM
+    SYSTEM --> HEALTH["GET /health<br/>📝 Public<br/>Response: HealthCheck"]
+    SYSTEM --> METRICS["GET /metrics<br/>📝 Public<br/>Response: Prometheus Metrics"]
+    
+    %% Database
+    DB["🗄️ PostgreSQL<br/>Database"]
+    USER -.-> DB
+    PRODUCER -.-> DB
+    FARM -.-> DB
+    CROP -.-> DB
+    HARVEST -.-> DB
+    
+    %% External Services
+    JWT["🔑 JWT Service<br/>Access + Refresh Tokens"]
+    WINSTON["📊 Winston Logger"]
+    PROMETHEUS["📈 Prometheus<br/>Metrics Collection"]
+    GRAFANA["📊 Grafana<br/>Monitoring Dashboard"]
+    
+    AUTH -.-> JWT
+    API -.-> WINSTON
+    SYSTEM -.-> PROMETHEUS
+    PROMETHEUS -.-> GRAFANA
+    
+    %% Relationships
+    PRODUCER -.->|"1:N"| FARM
+    FARM -.->|"1:N"| HARVEST
+    HARVEST -.->|"N:M"| CROP
+    
+    %% Styling
+    classDef publicEndpoint fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef adminOnly fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef gestorAdmin fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef allRoles fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef systemModule fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef database fill:#fff8e1,stroke:#f57f17,stroke-width:2px
+    classDef external fill:#fafafa,stroke:#616161,stroke-width:2px
+    
+    class LOGIN,REFRESH,USER_CREATE,HEALTH,METRICS publicEndpoint
+    class USER_LIST,USER_UPDATE,USER_DELETE,PROD_LIST,FARM_LIST,CROP_LIST,HARV_LIST adminOnly
+    class PROD_CREATE,PROD_GET,PROD_UPDATE,PROD_DELETE,FARM_CREATE,FARM_UPDATE,FARM_DELETE,CROP_CREATE,CROP_UPDATE,CROP_DELETE,HARV_CREATE,HARV_UPDATE,HARV_DELETE gestorAdmin
+    class USER_GET,FARM_GET,CROP_GET,HARV_GET allRoles
+    class AUTH,USER,PRODUCER,FARM,CROP,HARVEST,SYSTEM systemModule
+    class DB database
+    class JWT,WINSTON,PROMETHEUS,GRAFANA external

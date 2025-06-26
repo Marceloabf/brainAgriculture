@@ -1,193 +1,589 @@
-# Brain Agriculture API
+# Brain Agriculture API 🌾
 
-API backend desenvolvida em NestJS para gerenciamento agrícola, incluindo módulos de produtores rurais, fazendas, safras e culturas.
+Uma API REST completa para gerenciamento de produtores rurais, fazendas, safras e culturas, desenvolvida com NestJS, TypeScript e PostgreSQL.
 
-## Tecnologias utilizadas
+## 📋 Índice
 
-- **NestJS** (Framework Node.js)
-- **TypeScript** (Linguagem de programação)
-- **TypeORM** (ORM para PostgreSQL)
-- **PostgreSQL** (Banco de dados relacional)
-- **Jest** (Testes automatizados)
-- **UUID** (Identificadores únicos para entidades)
-- **Class Validator** (Validação de dados)
-- **Class Transformer** (Transformação de dados)
+- [Características](#características)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação](#instalação)
+- [Configuração de Ambiente](#configuração-de-ambiente)
+- [Executando a Aplicação](#executando-a-aplicação)
+- [Documentação da API](#documentação-da-api)
+- [Exemplos de Uso](#exemplos-de-uso)
+- [Testes](#testes)
+- [Monitoramento](#monitoramento)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
 
+## ✨ Características
 
-## Funcionalidades
+- **Autenticação JWT** com refresh tokens
+- **Autorização baseada em roles** (Admin, Gestor, Funcionário)
+- **CRUD completo** para todas as entidades
+- **Validação de dados** com class-validator
+- **Documentação automática** com Swagger
+- **Logs estruturados** com Winston
+- **Métricas** com Prometheus
+- **Health checks** para monitoramento
+- **Testes unitários e E2E** com Jest
+- **Docker** para containerização
+- **Validação de CPF/CNPJ**
 
-### Módulo Producer (Produtores)
-- ✅ Criar, listar, buscar, atualizar e remover produtores
-- ✅ Validação de CPF/CNPJ
-- ✅ Relacionamento com fazendas
+## 🛠 Tecnologias Utilizadas
 
-### Módulo Farm (Fazendas)
-- ✅ Gerenciamento completo de fazendas
-- ✅ Validação de áreas (total, agrícola, vegetação)
-- ✅ Relacionamento com produtores e safras
+- **Backend**: NestJS, TypeScript
+- **Banco de Dados**: PostgreSQL
+- **ORM**: TypeORM
+- **Autenticação**: JWT (jsonwebtoken)
+- **Validação**: class-validator, class-transformer
+- **Documentação**: Swagger/OpenAPI
+- **Logs**: Winston
+- **Métricas**: Prometheus
+- **Monitoramento**: Grafana
+- **Testes**: Jest, Supertest
+- **Containerização**: Docker, Docker Compose
 
-### Módulo Harvest (Safras)
-- ✅ Controle de safras por fazenda
-- ✅ Prevenção de duplicação de nomes por fazenda
-- ✅ Relacionamento com culturas
+## 📋 Pré-requisitos
 
-### Módulo Crop (Culturas)
-- ✅ Gerenciamento de culturas por safra
-- ✅ Relacionamento com safras
+Antes de começar, certifique-se de ter instalado:
 
-## Como rodar o projeto
+- **Node.js** (versão 18 ou superior)
+- **npm** ou **yarn**
+- **Docker** e **Docker Compose**
+- **Git**
 
-### Requisitos
-- Node.js >= 18.x
-- PostgreSQL >= 12.x
-- npm ou yarn
+## 🚀 Instalação
 
-### Passos
+### 1. Clone o repositório
 
-1. **Clone o repositório:**
 \`\`\`bash
-git clone <repo-url>
-cd brain-agriculture-api
+git clone https://github.com/seu-usuario/brain-agriculture.git
+cd brain-agriculture
 \`\`\`
 
-2. **Instale as dependências:**
+### 2. Instale as dependências
+
 \`\`\`bash
 npm install
 \`\`\`
 
-3. **Configure variáveis de ambiente:**
-Copie e edite o `.env.example` para `.env`:
+### 3. Configure as variáveis de ambiente
 
+Copie os arquivos de exemplo e configure as variáveis:
 
-4. **Configure o banco de dados:**
-Certifique-se de que o PostgreSQL está rodando e funcionando.
-
-
-6. **Rode a aplicação:**
 \`\`\`bash
-# Desenvolvimento
+# Crie os diretórios de ambiente se não existirem
+mkdir -p env
+
+# Copie os arquivos de exemplo
+cp env/.env.example env/.env.dev
+cp env/.env.example env/.env.prod
+cp env/.env.example env/.env.test
+\`\`\`
+
+## ⚙️ Configuração de Ambiente
+
+### Variáveis de Ambiente
+
+Crie os seguintes arquivos na pasta \`env/\`:
+
+#### \`env/.env.dev\` (Desenvolvimento)
+\`\`\`env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=brain_agriculture
+
+# JWT
+JWT_SECRET=seu-jwt-secret-super-seguro-aqui
+JWT_REFRESH_SECRET=seu-refresh-secret-super-seguro-aqui
+
+# Application
+NODE_ENV=development
+PORT=3000
+\`\`\`
+
+#### \`env/.env.prod\` (Produção)
+\`\`\`env
+# Database
+DB_HOST=db
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=brain_agriculture
+
+# JWT
+JWT_SECRET=seu-jwt-secret-producao-super-seguro
+JWT_REFRESH_SECRET=seu-refresh-secret-producao-super-seguro
+
+# Application
+NODE_ENV=production
+PORT=3000
+\`\`\`
+
+#### \`env/.env.test\` (Testes)
+\`\`\`env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=brain_agriculture_test
+
+# JWT
+JWT_SECRET=test-jwt-secret
+JWT_REFRESH_SECRET=test-refresh-secret
+
+# Application
+NODE_ENV=test
+PORT=3001
+\`\`\`
+
+### Configuração do Docker
+
+O projeto inclui arquivos Docker para facilitar o desenvolvimento:
+
+- \`docker-compose.yml\` - Configuração principal
+- \`docker-compose.dev.yml\` - Sobrescrita para desenvolvimento
+- \`docker-compose.prod.yml\` - Sobrescrita para produção
+
+## 🏃‍♂️ Executando a Aplicação
+
+### Opção 1: Com Docker (Recomendado)
+
+#### Desenvolvimento
+\`\`\`bash
+# Inicie todos os serviços (API, PostgreSQL, Prometheus, Grafana)
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+# Visualize os logs
+docker-compose logs -f api
+\`\`\`
+
+#### Produção
+\`\`\`bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+\`\`\`
+
+### Opção 2: Localmente
+
+#### 1. Inicie o PostgreSQL
+\`\`\`bash
+# Apenas o banco de dados
+docker-compose up -d db
+\`\`\`
+
+#### 2. Execute a aplicação
+\`\`\`bash
+# Desenvolvimento (com hot reload)
 npm run start:dev
 
 # Produção
+npm run build
 npm run start:prod
 \`\`\`
 
-A API estará disponível em `http://localhost:3000`
+### Verificando se está funcionando
 
-## Testes
+Acesse: \`http://localhost:3000\`
 
-### Executar testes
+Você deve ver: \`Hello World!\`
+
+## 📚 Documentação da API
+
+A documentação interativa da API está disponível via Swagger:
+
+- **URL**: \`http://localhost:3000/api\`
+- **Formato**: OpenAPI 3.0
+
+### Endpoints Principais
+
+| Método | Endpoint | Descrição | Autenticação |
+|--------|----------|-----------|--------------|
+| POST | \`/auth/login\` | Login do usuário | ❌ |
+| POST | \`/auth/refresh-token\` | Renovar token | ❌ |
+| POST | \`/users\` | Criar usuário | ❌ |
+| GET | \`/users\` | Listar usuários | ✅ Admin |
+| POST | \`/producers\` | Criar produtor | ✅ Admin/Gestor |
+| GET | \`/producers\` | Listar produtores | ✅ Admin |
+| POST | \`/farms\` | Criar fazenda | ✅ Admin/Gestor |
+| GET | \`/farms\` | Listar fazendas | ✅ Admin |
+| POST | \`/crops\` | Criar cultura | ✅ Admin/Gestor |
+| GET | \`/crops\` | Listar culturas | ✅ Admin |
+| POST | \`/harvests\` | Criar safra | ✅ Admin/Gestor |
+| GET | \`/harvests\` | Listar safras | ✅ Admin |
+| GET | \`/health\` | Health check | ❌ |
+| GET | \`/metrics\` | Métricas Prometheus | ❌ |
+
+## 🔧 Exemplos de Uso
+
+### 1. Criando um Usuário
+
 \`\`\`bash
-# Todos os testes
+curl -X POST http://localhost:3000/users \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "João Silva",
+    "email": "joao@exemplo.com",
+    "password": "MinhaSenh@123",
+    "role": "admin"
+  }'
+\`\`\`
+
+**Resposta:**
+\`\`\`json
+{
+  "id": "uuid-gerado",
+  "name": "João Silva",
+  "email": "joao@exemplo.com",
+  "role": "admin",
+  "createdAt": "2024-01-01T10:00:00.000Z",
+  "updatedAt": "2024-01-01T10:00:00.000Z"
+}
+\`\`\`
+
+### 2. Fazendo Login
+
+\`\`\`bash
+curl -X POST http://localhost:3000/auth/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "email": "joao@exemplo.com",
+    "password": "MinhaSenh@123"
+  }'
+\`\`\`
+
+**Resposta:**
+\`\`\`json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+\`\`\`
+
+### 3. Criando um Produtor
+
+\`\`\`bash
+curl -X POST http://localhost:3000/producers \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+  -d '{
+    "name": "Maria Santos",
+    "document": "12345678901"
+  }'
+\`\`\`
+
+**Resposta:**
+\`\`\`json
+{
+  "id": "uuid-gerado",
+  "name": "Maria Santos",
+  "document": "12345678901",
+  "farms": []
+}
+\`\`\`
+
+### 4. Criando uma Fazenda
+
+\`\`\`bash
+curl -X POST http://localhost:3000/farms \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+  -d '{
+    "name": "Fazenda Esperança",
+    "city": "São Paulo",
+    "state": "SP",
+    "totalArea": 100,
+    "agriculturalArea": 70,
+    "vegetationArea": 30,
+    "producerId": "uuid-do-produtor"
+  }'
+\`\`\`
+
+### 5. Criando uma Cultura
+
+\`\`\`bash
+curl -X POST http://localhost:3000/crops \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+  -d '{
+    "name": "Soja"
+  }'
+\`\`\`
+
+### 6. Criando uma Safra
+
+\`\`\`bash
+curl -X POST http://localhost:3000/harvests \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+  -d '{
+    "name": "Safra Verão 2024",
+    "farmId": "uuid-da-fazenda",
+    "crops": ["uuid-cultura-1", "uuid-cultura-2"]
+  }'
+\`\`\`
+
+### 7. Consultando Health Check
+
+\`\`\`bash
+curl http://localhost:3000/health
+\`\`\`
+
+**Resposta:**
+\`\`\`json
+{
+  "status": "ok",
+  "info": {
+    "database": {
+      "status": "up"
+    }
+  }
+}
+\`\`\`
+
+## 🧪 Testes
+
+### Executando Testes
+
+\`\`\`bash
+# Testes unitários
 npm run test
 
-# Testes em modo watch
+# Testes unitários com watch
 npm run test:watch
 
-# Testes com cobertura
+# Testes E2E
+npm run test:e2e
+
+# Coverage
 npm run test:cov
-
-
-### Estrutura dos testes
-- **Testes unitários**: Cada service possui seus testes em `src/modules/*/tests/`
-- **Configuração**: Arquivo `test/setup.ts` com configurações globais
-- **Mocks**: Repositórios mockados para isolamento dos testes
-
-### Configuração do Jest
-O projeto utiliza uma configuração customizada do Jest:
-- **Timeout**: 30 segundos para testes assíncronos
-- **Mocks**: Limpeza automática entre testes
-- **TypeScript**: Suporte completo via ts-jest
-- **Módulos**: Mapeamento de paths para imports absolutos
-
-## Endpoints da API
-
-### Produtores (`/producers`)
-- `GET /producers` - Listar todos os produtores
-- `GET /producers/:id` - Buscar produtor por ID
-- `POST /producers` - Criar novo produtor
-- `PATCH /producers/:id` - Atualizar produtor
-- `DELETE /producers/:id` - Remover produtor
-
-### Fazendas (`/farms`)
-- `GET /farms` - Listar todas as fazendas
-- `GET /farms/:id` - Buscar fazenda por ID
-- `POST /farms` - Criar nova fazenda
-- `PATCH /farms/:id` - Atualizar fazenda
-- `DELETE /farms/:id` - Remover fazenda
-
-### Safras (`/harvests`)
-- `GET /harvests` - Listar todas as safras
-- `GET /harvests/:id` - Buscar safra por ID
-- `POST /harvests` - Criar nova safra
-- `PATCH /harvests/:id` - Atualizar safra
-- `DELETE /harvests/:id` - Remover safra
-
-### Culturas (`/crops`)
-- `GET /crops` - Listar todas as culturas
-- `GET /crops/:id` - Buscar cultura por ID
-- `GET /crops/harvest/:harvestId` - Listar culturas por safra
-- `POST /crops` - Criar nova cultura
-- `PATCH /crops/:id` - Atualizar cultura
-- `DELETE /crops/:id` - Remover cultura
-
-## Validações implementadas
-
-- **CPF/CNPJ**: Validação de formato e dígitos verificadores
-- **Áreas**: Soma das áreas agrícola e vegetação não pode exceder área total
-- **Relacionamentos**: Validação de existência de entidades relacionadas
-- **Duplicação**: Prevenção de nomes duplicados onde aplicável
-
-## Arquitetura
-
-### Padrões utilizados
-- **Repository Pattern**: Abstração da camada de dados
-- **DTO Pattern**: Validação e transformação de dados
-- **Dependency Injection**: Inversão de controle via NestJS
-- **Modular Architecture**: Separação por domínios de negócio
-
-### Relacionamentos
-\`\`\`
-Producer (1) ←→ (N) Farm (1) ←→ (N) Harvest (N) ←→ (N) Crop
 \`\`\`
 
-## Troubleshooting
+### Estrutura de Testes
 
-### Problemas comuns
+\`\`\`
+test/
+├── e2e/                    # Testes end-to-end
+│   ├── factories/          # Factories para dados de teste
+│   ├── mocks/             # Mocks para guards
+│   └── *.e2e-spec.ts      # Arquivos de teste E2E
+├── mocks/                 # Mocks globais
+└── setup.ts              # Configuração dos testes
+\`\`\`
 
-1. **Erro de conexão com banco:**
-   - Verifique se o PostgreSQL está rodando
-   - Confirme as credenciais no arquivo `.env`
+## 📊 Monitoramento
 
-2. **Falhas nos testes:**
-   - Execute `npm run test:clearCache`
-   - Verifique se não há processos Jest em execução
+### Métricas com Prometheus
 
-3. **Imports não encontrados:**
-   - Verifique o `tsconfig.json` e `jest.config.js`
-   - Confirme os paths de módulos
+Acesse: \`http://localhost:9090\`
 
-## Contribuição
+Métricas disponíveis:
+- \`http_requests_total\` - Total de requisições HTTP
+- \`http_request_duration_seconds\` - Duração das requisições
+- \`http_requests_in_progress\` - Requisições em andamento
+
+### Dashboard com Grafana
+
+Acesse: \`http://localhost:3001\`
+
+- **Usuário**: admin
+- **Senha**: admin
+
+### Logs
+
+Os logs são salvos em:
+- \`logs/combined.log\` - Todos os logs
+- \`logs/error.log\` - Apenas erros
+
+## 📁 Estrutura do Projeto
+
+\`\`\`
+src/
+├── common/                 # Código compartilhado
+│   ├── decorators/        # Decorators customizados
+│   ├── guards/           # Guards de autenticação/autorização
+│   ├── interceptors/     # Interceptors
+│   ├── middleware/       # Middlewares
+│   └── validators/       # Validadores customizados
+├── config/               # Configurações
+│   ├── logger.config.ts  # Configuração do Winston
+│   └── typeorm.config.ts # Configuração do TypeORM
+├── modules/              # Módulos da aplicação
+│   ├── auth/            # Autenticação
+│   ├── user/            # Usuários
+│   ├── producer/        # Produtores
+│   ├── farm/            # Fazendas
+│   ├── crop/            # Culturas
+│   ├── harvest/         # Safras
+│   ├── health/          # Health checks
+│   └── metrics/         # Métricas
+├── app.module.ts        # Módulo principal
+└── main.ts             # Ponto de entrada
+\`\`\`
+
+### Padrão dos Módulos
+
+Cada módulo segue a estrutura:
+
+\`\`\`
+module/
+├── dto/                 # Data Transfer Objects
+├── entities/           # Entidades do banco
+├── tests/             # Testes unitários
+├── module.controller.ts # Controller
+├── module.service.ts   # Service
+└── module.module.ts    # Module
+\`\`\`
+
+## 🔐 Autenticação e Autorização
+
+### Roles Disponíveis
+
+- **ADMIN**: Acesso total ao sistema
+- **GESTOR**: Pode gerenciar produtores, fazendas, culturas e safras
+- **FUNCIONARIO**: Acesso apenas para consulta
+
+### Fluxo de Autenticação
+
+1. **Login**: POST \`/auth/login\` com email/senha
+2. **Recebe**: Access token (15min) + Refresh token (7 dias)
+3. **Usa**: Access token no header \`Authorization: Bearer <token>\`
+4. **Renova**: POST \`/auth/refresh-token\` quando access token expira
+
+### Exemplo de Uso com Token
+
+\`\`\`javascript
+// 1. Login
+const loginResponse = await fetch('/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'usuario@exemplo.com',
+    password: 'senha123'
+  })
+});
+
+const { accessToken } = await loginResponse.json();
+
+// 2. Usar token nas requisições
+const response = await fetch('/producers', {
+  headers: {
+    'Authorization': \`Bearer \${accessToken}\`,
+    'Content-Type': 'application/json'
+  }
+});
+\`\`\`
+
+## 🚨 Tratamento de Erros
+
+A API retorna erros padronizados:
+
+\`\`\`json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request"
+}
+\`\`\`
+
+### Códigos de Status Comuns
+
+- **200**: Sucesso
+- **201**: Criado com sucesso
+- **400**: Dados inválidos
+- **401**: Não autenticado
+- **403**: Não autorizado
+- **404**: Não encontrado
+- **409**: Conflito (ex: email já existe)
+- **500**: Erro interno do servidor
+
+## 🔧 Scripts Disponíveis
+
+\`\`\`bash
+# Desenvolvimento
+npm run start:dev        # Inicia com hot reload
+npm run start:debug      # Inicia com debug
+
+# Produção
+npm run build           # Compila o projeto
+npm run start:prod      # Inicia versão de produção
+
+# Testes
+npm run test           # Testes unitários
+npm run test:watch     # Testes com watch
+npm run test:e2e       # Testes E2E
+npm run test:cov       # Coverage
+
+# Linting
+npm run lint           # Executa ESLint
+npm run lint:fix       # Corrige problemas automaticamente
+
+# Formatação
+npm run format         # Formata código com Prettier
+\`\`\`
+
+## 🐳 Docker
+
+### Comandos Úteis
+
+\`\`\`bash
+# Construir imagens
+docker-compose build
+
+# Iniciar serviços
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f api
+
+# Parar serviços
+docker-compose down
+
+# Limpar volumes (CUIDADO: apaga dados)
+docker-compose down -v
+\`\`\`
+
+### Portas dos Serviços
+
+- **API**: 3000
+- **PostgreSQL**: 5432
+- **Prometheus**: 9090
+- **Grafana**: 3001
+
+## 🤝 Contribuição
 
 1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+2. Crie uma branch para sua feature (\`git checkout -b feature/AmazingFeature\`)
+3. Commit suas mudanças (\`git commit -m 'Add some AmazingFeature'\`)
+4. Push para a branch (\`git push origin feature/AmazingFeature\`)
 5. Abra um Pull Request
 
-## Considerações finais
+### Padrões de Código
 
-- **Arquitetura modular**: Facilita manutenção e escalabilidade
-- **UUIDs**: Identificadores únicos evitam conflitos
-- **Validações robustas**: Garantem integridade dos dados
-- **Testes abrangentes**: Cobertura dos cenários principais
-- **TypeScript**: Type safety em todo o projeto
-- **Documentação inline**: Código autodocumentado
+- Use **TypeScript** para tipagem forte
+- Siga os padrões do **ESLint** e **Prettier**
+- Escreva **testes** para novas funcionalidades
+- Documente **endpoints** no Swagger
+- Use **commits semânticos**
 
-## Contato
+## 📄 Licença
 
-Em caso de dúvidas ou sugestões, entre em contato: mrcloabf@gmail.com
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## Licença
+## 📞 Suporte
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Se você encontrar algum problema ou tiver dúvidas:
+
+1. Verifique a [documentação da API](http://localhost:3000/api)
+2. Consulte os [logs da aplicação](logs/)
+3. Abra uma [issue](https://github.com/seu-usuario/brain-agriculture/issues)
+
+---
+
+**Desenvolvido com ❤️ para o agronegócio brasileiro** 🇧🇷
