@@ -7,6 +7,8 @@ import { RolesGuard } from '../../src/common/guards/roles.guard';
 import { MockJwtAuthGuard } from '../mocks/jwt-auth.guard';
 import { MockRolesGuard } from '../mocks/roles.guard';
 import { faker } from '@faker-js/faker';
+import { AppTestModule } from '../app-test.module';
+import { cpf } from 'cpf-cnpj-validator';
 
 describe('Producer (e2e)', () => {
   let app: INestApplication;
@@ -14,7 +16,7 @@ describe('Producer (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppTestModule],
     })
       .overrideGuard(JwtAuthGuard)
       .useClass(MockJwtAuthGuard)
@@ -33,7 +35,7 @@ describe('Producer (e2e)', () => {
   it('/producers (POST) - should create a producer', async () => {
     const createDto = {
       name: faker.person.fullName(),
-      document: faker.string.numeric(11),
+      document: cpf.generate(),
     };
 
     const response = await request(app.getHttpServer())

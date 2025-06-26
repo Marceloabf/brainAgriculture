@@ -1,11 +1,14 @@
-import { beforeEach, afterAll, jest } from "@jest/globals"
+import * as dotenv from 'dotenv';
+import { beforeEach, afterAll, jest } from '@jest/globals';
 
-jest.setTimeout(30000)
+dotenv.config({ path: 'env/.env.test' });
+
+jest.setTimeout(30000);
 
 beforeEach(() => {
-  jest.clearAllMocks()
-})
+  jest.clearAllMocks();
+});
 
 afterAll(async () => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-})
+  await new Promise((resolve) => setTimeout(resolve, 500));
+});

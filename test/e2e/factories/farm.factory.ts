@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { cpf } from 'cpf-cnpj-validator';
 import { Farm } from 'src/modules/farm/entities/farm.entity';
 import { Producer } from 'src/modules/producer/entities/producer.entity';
 
@@ -6,7 +7,7 @@ export function createProducer(override?: Partial<Producer>): Producer {
   return {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
-    document: faker.string.numeric(11),
+    document: cpf.generate(),
     farms: [],
     ...override,
   };

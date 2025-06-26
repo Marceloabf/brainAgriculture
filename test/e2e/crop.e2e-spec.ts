@@ -7,6 +7,7 @@ import { RolesGuard } from '../../src/common/guards/roles.guard';
 import { MockJwtAuthGuard } from '../mocks/jwt-auth.guard';
 import { MockRolesGuard } from '../mocks/roles.guard';
 import { faker } from '@faker-js/faker';
+import { AppTestModule } from '../app-test.module';
 
 describe('Crop (e2e)', () => {
   let app: INestApplication;
@@ -15,11 +16,11 @@ describe('Crop (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppTestModule],
     })
-      .overrideProvider(JwtAuthGuard)
+      .overrideGuard(JwtAuthGuard)
       .useClass(MockJwtAuthGuard)
-      .overrideProvider(RolesGuard)
+      .overrideGuard(RolesGuard)
       .useClass(MockRolesGuard)
       .compile();
 
@@ -35,7 +36,6 @@ describe('Crop (e2e)', () => {
   it('/crops (POST) should create a crop', async () => {
     const cropDto = {
       name: faker.word.words(2),
-      variety: faker.word.words(1),
     };
 
     const response = await request(server).post('/crops').send(cropDto);
@@ -43,7 +43,6 @@ describe('Crop (e2e)', () => {
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id');
     expect(response.body.name).toBe(cropDto.name);
-    expect(response.body.variety).toBe(cropDto.variety);
 
     createdCropId = response.body.id;
   });
@@ -63,7 +62,6 @@ describe('Crop (e2e)', () => {
   it('/crops/:id (PUT) should update a crop', async () => {
     const updateDto = {
       name: 'Updated Crop Name',
-      variety: 'Updated Variety',
     };
 
     const response = await request(server)
@@ -72,7 +70,6 @@ describe('Crop (e2e)', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe(updateDto.name);
-    expect(response.body.variety).toBe(updateDto.variety);
   });
 
   it('/crops/:id (DELETE) should delete a crop', async () => {

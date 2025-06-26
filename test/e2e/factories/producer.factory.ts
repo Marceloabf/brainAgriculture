@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker/.";
+import { cpf } from "cpf-cnpj-validator";
 
 export const createProducer = () => ({
     id: faker.string.uuid(),
     name: faker.person.fullName(),
-    document: faker.string.numeric(11),
+    document: cpf.generate(),
     farms: [
       {
         id: faker.string.uuid(),

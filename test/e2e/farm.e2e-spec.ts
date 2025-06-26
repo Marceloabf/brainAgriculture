@@ -8,6 +8,7 @@ import { MockJwtAuthGuard } from '../mocks/jwt-auth.guard';
 import { MockRolesGuard } from '../mocks/roles.guard';
 import { createProducer } from './factories/producer.factory';
 import { DataSource } from 'typeorm';
+import { AppTestModule } from '../app-test.module';
 
 describe('Farm (e2e)', () => {
   let app: INestApplication;
@@ -18,11 +19,11 @@ describe('Farm (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppTestModule],
     })
-      .overrideProvider(JwtAuthGuard)
+      .overrideGuard(JwtAuthGuard)
       .useClass(MockJwtAuthGuard)
-      .overrideProvider(RolesGuard)
+      .overrideGuard(RolesGuard)
       .useClass(MockRolesGuard)
       .compile();
 

@@ -7,14 +7,20 @@ import { RolesGuard } from '../../src/common/guards/roles.guard';
 import { MockJwtAuthGuard } from '../mocks/jwt-auth.guard';
 import { MockRolesGuard } from '../mocks/roles.guard';
 import { faker } from '@faker-js/faker';
+import { AppTestModule } from '../app-test.module';
+import { cpf } from 'cpf-cnpj-validator';
+import { Harvest } from 'src/modules/harvest/entities/harvest.entity';
 
 describe('Harvest (e2e)', () => {
   let app: INestApplication;
   let createdHarvestId: string;
+  let farmId: string;
+  let cropIds: string[];
+let producerId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppTestModule],
     })
       .overrideGuard(JwtAuthGuard)
       .useClass(MockJwtAuthGuard)
@@ -24,13 +30,49 @@ describe('Harvest (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+
+     const producerResponse = await request(app.getHttpServer())
+    .post('/producers')
+    .send({
+      name: faker.person.fullName(),
+      document: cpf.generate(),
+      farms: [],
+    })
+    .expect(201);
+    producerId = producerResponse.body.id;
+
+    const farmResponse = await request(app.getHttpServer())
+      .post('/farms')
+      .send({
+        name: faker.company.name(),
+        city: faker.location.city(),
+        state: faker.location.state({ abbreviated: true }),
+        producerId: producerId,
+        totalArea: 100,
+        agriculturalArea: 70,
+        vegetationArea: 30,
+      })
+      .expect(201);
+      farmId = farmResponse.body.id;
+
+    const cropResponse1 = await request(app.getHttpServer())
+      .post('/crops')
+      .send({ name: 'Soja' })
+      .expect(201);
+
+    const cropResponse2 = await request(app.getHttpServer())
+      .post('/crops')
+      .send({ name: 'Milho' })
+      .expect(201);
+
+    cropIds = [cropResponse1.body.id, cropResponse2.body.id];
   });
 
   it('/harvests (POST) should create a harvest', async () => {
     const createDto = {
-      name: faker.company.name(), 
-      farmId: faker.string.uuid(), 
-      crops: [faker.string.uuid(), faker.string.uuid()], 
+      name: faker.company.name(),
+      farmId: farmId,
+      crops: cropIds,
     };
 
     const response = await request(app.getHttpServer())
