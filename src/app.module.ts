@@ -17,6 +17,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { HealthModule } from './modules/health/health.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     HarvestModule,
     CropModule,
     AuthModule,
+    HealthModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [

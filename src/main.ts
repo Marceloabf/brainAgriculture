@@ -3,9 +3,14 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './config/logger.config';
+import { PrometheusInterceptor } from './common/interceptors/prometheus.interceptor';
 
 async function bootstrap() {
-   const app = await NestFactory.create(AppModule, {logger: ["error", "warn", "log", "debug", "verbose"]});
+   const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonConfig),
+  });
 
   const logger = new Logger("Bootstrap")
 
@@ -20,6 +25,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  app.useGlobalInterceptors(new PrometheusInterceptor());
   await app.listen(3000);
   logger.log("Aplicação iniciada na porta 3000")
 }

@@ -4,7 +4,7 @@
 /build
 
 # Logs
-logs
+/logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
@@ -41,6 +41,12 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+
+# Se os arquivos .env estão dentro da pasta "env", ignorar todos
+env/*.env
+
+# Mas manter o arquivo env/.env.example
+!env/.env.example
 
 # temp directory
 .temp
