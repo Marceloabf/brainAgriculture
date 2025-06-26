@@ -1,24 +1,22 @@
 import {
-  Controller,
-  Post,
   Body,
-  Get,
-  Param,
-  Put,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Put,
   UsePipes,
-  ValidationPipe,
-  UseGuards,
+  ValidationPipe
 } from '@nestjs/common';
-import { ProducerService } from './producer.service';
-import { CreateProducerDto } from './dto/create-producer.dto';
-import { UpdateProducerDto } from './dto/update-producer.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
+import { CreateProducerDto } from './dto/create-producer.dto';
+import { UpdateProducerDto } from './dto/update-producer.dto';
+import { ProducerService } from './producer.service';
 
 @ApiTags('producers')
 @Controller('producers')
@@ -26,7 +24,6 @@ import { UserRole } from '../user/entities/user.entity';
 export class ProducerController {
   constructor(private readonly producerService: ProducerService) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Cadastrar novo Produtor' })
@@ -37,7 +34,6 @@ export class ProducerController {
     return await this.producerService.create(dto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todos os Produtores' })
@@ -46,7 +42,6 @@ export class ProducerController {
     return await this.producerService.findAll();
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um Produtor por ID' })
@@ -56,7 +51,6 @@ export class ProducerController {
    return await this.producerService.findOne(id);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar um Produtor por ID' })
@@ -67,7 +61,6 @@ export class ProducerController {
     return await this.producerService.update(id, dto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um Produtor por ID' })

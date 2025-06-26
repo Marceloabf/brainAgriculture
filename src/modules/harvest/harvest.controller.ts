@@ -1,32 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
   Body,
-  ParseUUIDPipe,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
   UsePipes,
-  ValidationPipe,
-  UseGuards,
+  ValidationPipe
 } from '@nestjs/common';
-import { HarvestService } from './harvest.service';
-import { CreateHarvestDto } from './dto/create-harvest.dto';
-import { UpdateHarvestDto } from './dto/update-harvest.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
+import { CreateHarvestDto } from './dto/create-harvest.dto';
+import { UpdateHarvestDto } from './dto/update-harvest.dto';
+import { HarvestService } from './harvest.service';
 
 @ApiTags('harvests')
 @Controller('harvests')
 export class HarvestController {
   constructor(private readonly harvestService: HarvestService) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Safra' })
@@ -39,7 +36,6 @@ export class HarvestController {
     return await this.harvestService.create(createHarvestDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todas as Safras' })
@@ -48,7 +44,6 @@ export class HarvestController {
     return await this.harvestService.findAll();
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma Safra por ID' })
@@ -58,7 +53,6 @@ export class HarvestController {
     return await this.harvestService.findOne(id);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar uma Safra por ID' })
@@ -74,7 +68,6 @@ export class HarvestController {
     return await this.harvestService.update(id, updateHarvestDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma Safra por ID' })

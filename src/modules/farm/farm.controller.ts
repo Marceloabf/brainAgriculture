@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,18 +7,16 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserRole } from '../user/entities/user.entity';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { Farm } from './entities/farm.entity';
 import { FarmService } from './farm.service';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { UserRole } from '../user/entities/user.entity';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @ApiTags('farms')
 @Controller('farms')
@@ -28,7 +25,6 @@ export class FarmController {
   private readonly logger = new Logger(FarmController.name);
   constructor(private readonly farmService: FarmService) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Fazenda' })
@@ -39,7 +35,6 @@ export class FarmController {
     return await this.farmService.create(createFarmDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todas as Fazendas' })
@@ -48,7 +43,6 @@ export class FarmController {
     return await this.farmService.findAll();
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma Fazenda por ID' })
@@ -58,7 +52,6 @@ export class FarmController {
     return await this.farmService.findOne(id);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar uma Fazenda por ID' })
@@ -73,7 +66,6 @@ export class FarmController {
     return await this.farmService.update(id, updateFarmDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma Fazenda por ID' })

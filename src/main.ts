@@ -1,9 +1,8 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
    const app = await NestFactory.create(AppModule, {logger: ["error", "warn", "log", "debug", "verbose"]});
@@ -20,9 +19,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-
-  const reflector = app.get(Reflector);
-  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   await app.listen(3000);
   logger.log("Aplicação iniciada na porta 3000")

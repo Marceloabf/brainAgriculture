@@ -8,6 +8,7 @@ import type { UpdateProducerDto } from "../dto/update-producer.dto"
 import { jest } from "@jest/globals"
 import { faker } from "@faker-js/faker/."
 import { createProducer } from "../../../../test/e2e/factories/producer.factory"
+import { cpf } from "cpf-cnpj-validator"
 
 describe("ProducerService", () => {
   let service: ProducerService;
@@ -48,7 +49,7 @@ describe("ProducerService", () => {
     it("should create a producer", async () => {
       const createProducerDto: CreateProducerDto = {
         name: faker.person.fullName(),
-        document: faker.string.numeric(11),
+        document: cpf.generate(),
       };
 
       const mockProducer = createProducer();

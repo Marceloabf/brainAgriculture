@@ -1,25 +1,23 @@
 import {
-  Controller,
-  Post,
   Body,
-  Get,
-  Param,
-  Put,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Put,
   UsePipes,
-  ValidationPipe,
-  UseGuards,
+  ValidationPipe
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserService } from './user.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from './entities/user.entity';
-import { Public } from 'src/common/decorators/public.decorator';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { UserService } from './user.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -37,7 +35,6 @@ export class UserController {
     return await this.userService.create(dto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todos os usuários' })
@@ -46,7 +43,6 @@ export class UserController {
     return await this.userService.findAll();
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':email')
   @ApiOperation({ summary: 'Buscar um usuário por Email' })
@@ -56,7 +52,6 @@ export class UserController {
     return await this.userService.findByEmail(email);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar um usuário por ID' })
@@ -67,7 +62,6 @@ export class UserController {
     return await this.userService.update(id, dto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover um usuário por ID' })

@@ -5,12 +5,10 @@ import {
   Get,
   Param,
   Post,
-  Put,
-  UseGuards,
+  Put
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRole } from '../user/entities/user.entity';
 import { CropService } from './crop.service';
 import { CreateCropDto } from './dto/create-crop.dto';
@@ -24,7 +22,6 @@ export class CropController {
     private readonly cropService: CropService,
   ) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Post()
   @ApiOperation({ summary: 'Criar uma nova Cultura' })
@@ -36,7 +33,6 @@ export class CropController {
     return await this.cropService.create(createCropDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Listar todas as Culturas' })
@@ -46,7 +42,6 @@ export class CropController {
     return await this.cropService.findAll();
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
   @Get(':id')
   @ApiOperation({ summary: 'Buscar uma Cultura por ID' })
@@ -56,7 +51,6 @@ export class CropController {
     return await this.cropService.findOne(id);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar uma Cultura por ID' })
@@ -71,7 +65,6 @@ export class CropController {
     return await this.cropService.update(id, updateCropDto);
   }
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.GESTOR)
   @Delete(':id')
   @ApiOperation({ summary: 'Remover uma Cultura por ID' })
