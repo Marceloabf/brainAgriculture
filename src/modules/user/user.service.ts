@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
+    this.logger.log(`Tentativa de criar usuário com e-mail: ${dto.email}`);
+
     const existing = await this.userRepository.findOne({
       where: { email: dto.email },
     });
@@ -30,36 +33,95 @@ export class UserService {
     }
 
     const user = this.userRepository.create(dto);
-    return await this.userRepository.save(user);
+
+    try {
+      const saved = await this.userRepository.save(user);
+      this.logger.log(`Usuário criado com sucesso: ID ${saved.id}`);
+      return saved;
+    } catch (error) {
+      this.logger.error('Erro ao salvar usuário.', error.stack);
+      throw new InternalServerErrorException('Erro ao salvar usuário.');
+    }
   }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+     this.logger.log('Buscando todos os usuários');
+
+    try {
+      const users = await this.userRepository.find();
+      this.logger.log(`Retornados ${users.length} usuários`);
+      return users;
+    } catch (error) {
+      this.logger.error('Erro ao buscar usuários.', error.stack);
+      throw new InternalServerErrorException('Erro ao buscar usuários.');
+    }
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    this.logger.log(`Buscando usuário com ID: ${id}`);
 
-    if (!user) {
-      this.logger.error(`Usuário com id: ${id} não encontrado.`);
-      throw new NotFoundException('Usuário não encontrado.');
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        this.logger.error(`Usuário com ID ${id} não encontrado.`);
+        throw new NotFoundException('Usuário não encontrado.');
+      }
+
+      this.logger.log(`Usuário encontrado: ID ${user.id}`);
+      return user;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar usuário ID ${id}`, error.stack);
+      throw error instanceof NotFoundException
+        ? error
+        : new InternalServerErrorException('Erro ao buscar usuário.');
     }
-
-    return user;
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
+    this.logger.log(`Atualizando usuário ID ${id} com dados: ${JSON.stringify(dto)}`);
+
     const user = await this.findOne(id);
     Object.assign(user, dto);
-    return await this.userRepository.save(user);
+
+    try {
+      const saved = await this.userRepository.save(user);
+      this.logger.log(`Usuário atualizado com sucesso: ID ${saved.id}`);
+      return saved;
+    } catch (error) {
+      this.logger.error(`Erro ao atualizar usuário ID ${id}`, error.stack);
+      throw new InternalServerErrorException('Erro ao atualizar usuário.');
+    }
   }
 
   async remove(id: string): Promise<void> {
+   this.logger.log(`Removendo usuário ID ${id}`);
+
     const user = await this.findOne(id);
-    await this.userRepository.remove(user);
+
+    try {
+      await this.userRepository.remove(user);
+      this.logger.log(`Usuário removido com sucesso: ID ${id}`);
+    } catch (error) {
+      this.logger.error(`Erro ao remover usuário ID ${id}`, error.stack);
+      throw new InternalServerErrorException('Erro ao remover usuário.');
+    }
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { email } });
+   this.logger.log(`Buscando usuário por e-mail: ${email}`);
+
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (user) {
+        this.logger.log(`Usuário encontrado: ID ${user.id}`);
+      } else {
+        this.logger.warn(`Nenhum usuário encontrado com o e-mail ${email}`);
+      }
+      return user;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar usuário por e-mail: ${email}`, error.stack);
+      throw new InternalServerErrorException('Erro ao buscar usuário por e-mail.');
+    }
   }
 }

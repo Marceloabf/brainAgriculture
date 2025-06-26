@@ -24,6 +24,8 @@ export class FarmService {
   ) {}
 
   async create(dto: CreateFarmDto): Promise<Farm> {
+    this.logger.log(`Tentativa de criar fazenda: ${JSON.stringify(dto)}`);
+
     const producer = await this.producerRepository.findOne({
       where: { id: dto.producerId },
     });
@@ -33,10 +35,10 @@ export class FarmService {
       throw new NotFoundException('Produtor informado não foi encontrado.');
     }
 
-    if (
-      dto.totalArea < (dto.agriculturalArea + dto.vegetationArea)
-    ) {
-      this.logger.error(`A soma das áreas agrícola e de vegetação não pode ser maior que a área total.`);
+    if (dto.totalArea < dto.agriculturalArea + dto.vegetationArea) {
+      this.logger.error(
+        `A soma das áreas agrícola (${dto.agriculturalArea}) e de vegetação (${dto.vegetationArea}) não pode ser maior que a área total (${dto.totalArea}).`,
+      );
       throw new BadRequestException(
         'A soma das áreas agrícola e de vegetação não pode ser maior que a área total.',
       );
@@ -53,81 +55,114 @@ export class FarmService {
     });
 
     try {
-      return await this.farmRepository.save(farm);
+      const saved = await this.farmRepository.save(farm);
+      this.logger.log(`Fazenda criada com sucesso: ID ${saved.id}`);
+      return saved;
     } catch (error) {
+      this.logger.error('Erro ao salvar a fazenda.', error.stack);
       throw new InternalServerErrorException('Erro ao salvar a fazenda.');
     }
   }
 
   async findAll(): Promise<Farm[]> {
-    return this.farmRepository.find({
-      relations: ['producer', 'harvests'],
-    });
+   this.logger.log('Buscando todas as fazendas');
+
+    try {
+      const farms = await this.farmRepository.find({
+        relations: ['producer', 'harvests'],
+      });
+      this.logger.log(`Retornadas ${farms.length} fazendas`);
+      return farms;
+    } catch (error) {
+      this.logger.error('Erro ao buscar fazendas.', error.stack);
+      throw new InternalServerErrorException('Erro ao buscar fazendas.');
+    }
   }
 
   async findOne(id: string): Promise<Farm> {
-    const farm = await this.farmRepository.findOne({
-      where: { id },
-      relations: ['producer', 'harvests'],
-    });
+     this.logger.log(`Buscando fazenda com ID: ${id}`);
 
-    if (!farm) {
-      this.logger.error(`Fazenda com ID ${id} não encontrada.`);
-      throw new NotFoundException('Fazenda não encontrada.');
+    try {
+      const farm = await this.farmRepository.findOne({
+        where: { id },
+        relations: ['producer', 'harvests'],
+      });
+
+      if (!farm) {
+        this.logger.error(`Fazenda com ID ${id} não encontrada.`);
+        throw new NotFoundException('Fazenda não encontrada.');
+      }
+
+      this.logger.log(`Fazenda encontrada: ID ${farm.id}`);
+      return farm;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar fazenda ID ${id}`, error.stack);
+      throw error instanceof NotFoundException ? error : new InternalServerErrorException('Erro ao buscar fazenda.');
     }
-
-    return farm;
   }
 
   async update(id: string, dto: UpdateFarmDto): Promise<Farm> {
-  const existingFarm = await this.farmRepository.findOne({ where: { id } });
-  if (!existingFarm) {
-    this.logger.error(`Fazenda com ID ${id} não encontrada.`);
-    throw new NotFoundException(`Fazenda não encontrada.`);
-  }
+   this.logger.log(`Atualizando fazenda ID ${id} com dados: ${JSON.stringify(dto)}`);
 
-  let producer = existingFarm.producer;
-
-  if (dto.producerId && dto.producerId !== producer?.id) {
-    const foundProducer = await this.producerRepository.findOne({ where: { id: dto.producerId } });
-
-    if (!foundProducer) {
-      this.logger.error(`Produtor com ID ${dto.producerId} não encontrado.`);
-      throw new NotFoundException(`Produtor não encontrado.`);
+    const existingFarm = await this.farmRepository.findOne({ where: { id } });
+    if (!existingFarm) {
+      this.logger.error(`Fazenda com ID ${id} não encontrada.`);
+      throw new NotFoundException(`Fazenda não encontrada.`);
     }
 
-    producer = foundProducer;
-  }
+    let producer = existingFarm.producer;
+
+    if (dto.producerId && dto.producerId !== producer?.id) {
+      const foundProducer = await this.producerRepository.findOne({
+        where: { id: dto.producerId },
+      });
+
+      if (!foundProducer) {
+        this.logger.error(`Produtor com ID ${dto.producerId} não encontrado.`);
+        throw new NotFoundException(`Produtor não encontrado.`);
+      }
+
+      producer = foundProducer;
+    }
 
     const totalArea = dto.totalArea ?? existingFarm.totalArea;
     const agriculturalArea = dto.agriculturalArea ?? existingFarm.agriculturalArea;
     const vegetationArea = dto.vegetationArea ?? existingFarm.vegetationArea;
 
     if (agriculturalArea + vegetationArea > totalArea) {
-    this.logger.error(
-      `A soma da área agricultável (${agriculturalArea}) e da área de vegetação (${vegetationArea}) não pode ser maior que a área total (${totalArea}).`,
-    );
-    throw new BadRequestException(
-      'A soma da área agricultável e da área de vegetação não pode ser maior que a área total.',
-    );
-  }
+      this.logger.error(
+        `A soma da área agricultável (${agriculturalArea}) e da área de vegetação (${vegetationArea}) não pode ser maior que a área total (${totalArea}).`,
+      );
+      throw new BadRequestException(
+        'A soma da área agricultável e da área de vegetação não pode ser maior que a área total.',
+      );
+    }
 
-  const updatedFarm = await this.farmRepository.preload({
-    id,
-    ...dto,
-    producer,
-  });
+    const updatedFarm = await this.farmRepository.preload({
+      id,
+      ...dto,
+      producer,
+    });
 
-  if (!updatedFarm) {
-    this.logger.error(`Erro ao atualizar a fazenda com ID ${id}.`);
-    throw new InternalServerErrorException(`Erro ao atualizar a fazenda.`);
-  }
+    if (!updatedFarm) {
+      this.logger.error(`Erro ao atualizar a fazenda com ID ${id}.`);
+      throw new InternalServerErrorException(`Erro ao atualizar a fazenda.`);
+    }
 
-  return this.farmRepository.save(updatedFarm);
+    try {
+      const saved = await this.farmRepository.save(updatedFarm);
+      this.logger.log(`Fazenda atualizada com sucesso: ID ${saved.id}`);
+      return saved;
+    } catch (error) {
+      this.logger.error(`Erro ao salvar a fazenda atualizada ID ${id}`, error.stack);
+      throw new InternalServerErrorException('Erro ao atualizar a fazenda.');
+    }
   }
 
 
   async remove(id: string): Promise<void> {
+     this.logger.log(`Removendo fazenda ID ${id}`);
+
     const farm = await this.findOne(id);
     if (!farm) {
       this.logger.error(`Fazenda com ID ${id} não encontrada.`);
@@ -136,7 +171,9 @@ export class FarmService {
 
     try {
       await this.farmRepository.remove(farm);
+      this.logger.log(`Fazenda removida com sucesso: ID ${id}`);
     } catch (error) {
+      this.logger.error(`Erro ao remover fazenda ID ${id}`, error.stack);
       throw new InternalServerErrorException('Erro ao remover a fazenda.');
     }
   }

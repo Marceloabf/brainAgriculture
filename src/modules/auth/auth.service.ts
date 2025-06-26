@@ -48,7 +48,7 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    this.logger.log(`Login realizado com sucesso para o usuário ${user.email}`);
+    this.logger.log(`Login realizado com sucesso para o usuário ${user.email} (ID ${user.id})`, );
 
     return { accessToken, refreshToken };
   }

@@ -21,6 +21,8 @@ export class CropService {
   ) {}
 
   async create(dto: CreateCropDto): Promise<Crop> {
+    this.logger.log(`Tentativa de criar cultura com nome: ${dto.name}`);
+
     const existing = await this.cropRepository.findOne({
       where: { name: dto.name },
     });
@@ -29,40 +31,59 @@ export class CropService {
       this.logger.error(`Cultura com nome ${dto.name} já existe.`);
       throw new ConflictException('Já existe uma cultura com esse nome.');
     }
+
     const crop = this.cropRepository.create({
       name: dto.name,
     });
 
     try {
-      return await this.cropRepository.save(crop);
+      const saved = await this.cropRepository.save(crop);
+      this.logger.log(`Cultura salva com sucesso: ID ${saved.id}`);
+      return saved;
     } catch (error) {
+      this.logger.error('Erro ao salvar cultura.', error.stack);
       throw new InternalServerErrorException('Erro ao salvar cultura.');
     }
   }
 
   async findOne(id: string): Promise<Crop> {
-    const crop = await this.cropRepository.findOne({
-      where: { id },
-      relations: ['harvest'],
-    });
+    this.logger.log(`Buscando cultura com ID: ${id}`);
 
-    if (!crop) {
-      this.logger.error(`Cultura com ID ${id} não encontrada.`);
-      throw new NotFoundException(`Cultura não encontrada.`);
+    try {
+      const crop = await this.cropRepository.findOne({
+        where: { id },
+        relations: ['harvest'],
+      });
+
+      if (!crop) {
+        this.logger.error(`Cultura com ID ${id} não encontrada.`);
+        throw new NotFoundException(`Cultura não encontrada.`);
+      }
+
+      this.logger.log(`Cultura encontrada: ID ${crop.id}`);
+      return crop;
+    } catch (error) {
+      this.logger.error(`Erro ao buscar cultura ID ${id}`, error.stack);
+      throw error instanceof NotFoundException ? error : new InternalServerErrorException('Erro ao buscar cultura.');
     }
-
-    return crop;
   }
 
   async findAll(): Promise<Crop[]> {
+    this.logger.log('Buscando todas as culturas');
+
     try {
-      return this.cropRepository.find({ relations: ['harvest'] });
+      const crops = await this.cropRepository.find({ relations: ['harvest'] });
+      this.logger.log(`Retornadas ${crops.length} culturas`);
+      return crops;
     } catch (error) {
+      this.logger.error('Erro ao buscar culturas.', error.stack);
       throw new InternalServerErrorException('Erro ao buscar culturas.');
     }
   }
 
   async update(id: string, dto: UpdateCropDto): Promise<Crop> {
+    this.logger.log(`Atualizando cultura ID ${id} com dados: ${JSON.stringify(dto)}`);
+
     const crop = await this.cropRepository.findOne({ where: { id } });
 
     if (!crop) {
@@ -73,13 +94,18 @@ export class CropService {
     Object.assign(crop, dto);
 
     try {
-      return await this.cropRepository.save(crop);
+      const updated = await this.cropRepository.save(crop);
+      this.logger.log(`Cultura atualizada com sucesso: ID ${updated.id}`);
+      return updated;
     } catch (error) {
+      this.logger.error(`Erro ao atualizar cultura ID ${id}`, error.stack);
       throw new InternalServerErrorException('Erro ao atualizar cultura.');
     }
   }
 
   async remove(id: string): Promise<void> {
+    this.logger.log(`Removendo cultura ID ${id}`);
+
     const crop = await this.cropRepository.findOne({ where: { id } });
 
     if (!crop) {
@@ -89,7 +115,9 @@ export class CropService {
 
     try {
       await this.cropRepository.remove(crop);
+      this.logger.log(`Cultura removida com sucesso: ID ${id}`);
     } catch (error) {
+      this.logger.error(`Erro ao remover cultura ID ${id}`, error.stack);
       throw new InternalServerErrorException('Erro ao remover cultura.');
     }
   }
