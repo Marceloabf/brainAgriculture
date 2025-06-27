@@ -2,22 +2,6 @@
 
 Uma API REST completa para gerenciamento de produtores rurais, fazendas, safras e culturas, desenvolvida com NestJS, TypeScript e PostgreSQL.
 
-## 📋 Índice
-
-- [Características](#caracteristicas)
-- [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Pré-requisitos](#pre-requisitos)
-- [Instalação](#instalacao)
-- [Configuração de Ambiente](#configuracao-de-ambiente)
-- [Executando a Aplicação](#executando-a-aplicacao)
-- [Documentação da API](#documentacao-da-api)
-- [Exemplos de Uso](#exemplos-de-uso)
-- [Testes](#testes)
-- [Monitoramento](#monitoramento)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Contribuição](#contribuicao)
-- [Licença](#licenca)
-
 ## ✨ Características
 
 - **Autenticação JWT** com refresh tokens
