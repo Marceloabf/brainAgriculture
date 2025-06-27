@@ -29,7 +29,7 @@ export class CreateUserDto {
   })
   password: string;
 
-  @ApiProperty({ example: 'funcionário' })
+  @ApiProperty({ example: 'admin' })
   @IsEnum(UserRole, {
     message:
       'Role inválido. Os valores permitidos são: admin, gestor ou funcionário.',
