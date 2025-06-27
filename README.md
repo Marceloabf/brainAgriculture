@@ -11,6 +11,7 @@ Uma API REST completa para gerenciamento de produtores rurais, fazendas, safras 
 - **Documentação automática** com Swagger
 - **Logs estruturados** com Winston
 - **Métricas** com Prometheus
+- **Dashboard** com Grafana
 - **Health checks** para monitoramento
 - **Testes unitários e E2E** com Jest
 - **Docker** para containerização
