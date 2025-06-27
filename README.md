@@ -59,184 +59,102 @@ Antes de começar, certifique-se de ter instalado:
 
 ### 1. Clone o repositório
 
-\`\`\`bash
 git clone https://github.com/seu-usuario/brain-agriculture.git
 cd brain-agriculture
-\`\`\`
 
 ### 2. Instale as dependências
 
-\`\`\`bash
 npm install
-\`\`\`
 
 ### 3. Configure as variáveis de ambiente
 
 Copie os arquivos de exemplo e configure as variáveis:
 
-\`\`\`bash
-# Crie os diretórios de ambiente se não existirem
-mkdir -p env
-
-# Copie os arquivos de exemplo
-cp env/.env.example env/.env.dev
-cp env/.env.example env/.env.prod
-cp env/.env.example env/.env.test
-\`\`\`
-
 ## ⚙️ Configuração de Ambiente
 
 ### Variáveis de Ambiente
 
-Crie os seguintes arquivos na pasta \`env/\`:
+Siga o exemplo do env.example e crie pelo menos o seguinte arquivo na pasta `env/`:
 
-#### \`env/.env.dev\` (Desenvolvimento)
-\`\`\`env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_DATABASE=brain_agriculture
-
-# JWT
-JWT_SECRET=seu-jwt-secret-super-seguro-aqui
-JWT_REFRESH_SECRET=seu-refresh-secret-super-seguro-aqui
-
-# Application
-NODE_ENV=development
-PORT=3000
-\`\`\`
-
-#### \`env/.env.prod\` (Produção)
-\`\`\`env
-# Database
-DB_HOST=db
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_DATABASE=brain_agriculture
-
-# JWT
-JWT_SECRET=seu-jwt-secret-producao-super-seguro
-JWT_REFRESH_SECRET=seu-refresh-secret-producao-super-seguro
-
-# Application
-NODE_ENV=production
-PORT=3000
-\`\`\`
-
-#### \`env/.env.test\` (Testes)
-\`\`\`env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_DATABASE=brain_agriculture_test
-
-# JWT
-JWT_SECRET=test-jwt-secret
-JWT_REFRESH_SECRET=test-refresh-secret
-
-# Application
-NODE_ENV=test
-PORT=3001
-\`\`\`
+#### `env/.env.dev` (Desenvolvimento)
 
 ### Configuração do Docker
 
 O projeto inclui arquivos Docker para facilitar o desenvolvimento:
 
-- \`docker-compose.yml\` - Configuração principal
-- \`docker-compose.dev.yml\` - Sobrescrita para desenvolvimento
-- \`docker-compose.prod.yml\` - Sobrescrita para produção
+- `docker-compose.yml` - Configuração principal
+- `docker-compose.dev.yml` - Sobrescrita para desenvolvimento
+
+Caso vá configurar para prod, apenas criar o arquivo com o comando de prod:
+- `docker-compose.prod.yml` - Sobrescrita para produção
 
 ## 🏃‍♂️ Executando a Aplicação
 
 ### Opção 1: Com Docker (Recomendado)
 
 #### Desenvolvimento
-\`\`\`bash
 # Inicie todos os serviços (API, PostgreSQL, Prometheus, Grafana)
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 
 # Visualize os logs
 docker-compose logs -f api
-\`\`\`
 
-#### Produção
-\`\`\`bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-\`\`\`
-
-### Opção 2: Localmente
-
-#### 1. Inicie o PostgreSQL
-\`\`\`bash
-# Apenas o banco de dados
-docker-compose up -d db
-\`\`\`
-
-#### 2. Execute a aplicação
-\`\`\`bash
-# Desenvolvimento (com hot reload)
-npm run start:dev
-
-# Produção
-npm run build
-npm run start:prod
-\`\`\`
 
 ### Verificando se está funcionando
 
-Acesse: \`http://localhost:3000\`
+Acesse: `http://localhost:3000`
 
-Você deve ver: \`Hello World!\`
+Você deve ver: `Hello World!`
+
+# OU
+Acesse: `http://localhost:3000health`
+
+Você deve ver: `{"status":"ok","info":{"database":{"status":"up"}},"error":{},"details":{"database":{"status":"up"}}}`
+
 
 ## 📚 Documentação da API
 
 A documentação interativa da API está disponível via Swagger:
 
-- **URL**: \`http://localhost:3000/api\`
+- **URL**: `http://localhost:3000/api`
 - **Formato**: OpenAPI 3.0
 
 ### Endpoints Principais
 
 | Método | Endpoint | Descrição | Autenticação |
 |--------|----------|-----------|--------------|
-| POST | \`/auth/login\` | Login do usuário | ❌ |
-| POST | \`/auth/refresh-token\` | Renovar token | ❌ |
-| POST | \`/users\` | Criar usuário | ❌ |
-| GET | \`/users\` | Listar usuários | ✅ Admin |
-| POST | \`/producers\` | Criar produtor | ✅ Admin/Gestor |
-| GET | \`/producers\` | Listar produtores | ✅ Admin |
-| POST | \`/farms\` | Criar fazenda | ✅ Admin/Gestor |
-| GET | \`/farms\` | Listar fazendas | ✅ Admin |
-| POST | \`/crops\` | Criar cultura | ✅ Admin/Gestor |
-| GET | \`/crops\` | Listar culturas | ✅ Admin |
-| POST | \`/harvests\` | Criar safra | ✅ Admin/Gestor |
-| GET | \`/harvests\` | Listar safras | ✅ Admin |
-| GET | \`/health\` | Health check | ❌ |
-| GET | \`/metrics\` | Métricas Prometheus | ❌ |
+| POST | `/auth/login` | Login do usuário | ❌ |
+| POST | `/auth/refresh-token` | Renovar token | ❌ |
+| POST | `/users` | Criar usuário | ❌ |
+| GET | `/users` | Listar usuários | ✅ Admin |
+| POST | `/producers` | Criar produtor | ✅ Admin/Gestor |
+| GET | `/producers` | Listar produtores | ✅ Admin |
+| POST | `/farms` | Criar fazenda | ✅ Admin/Gestor |
+| GET | `/farms` | Listar fazendas | ✅ Admin |
+| POST | `/crops` | Criar cultura | ✅ Admin/Gestor |
+| GET | `/crops` | Listar culturas | ✅ Admin |
+| POST | `/harvests` | Criar safra | ✅ Admin/Gestor |
+| GET | `/harvests` | Listar safras | ✅ Admin |
+| GET | `/health` | Health check | ❌ |
+| GET | `/metrics` | Métricas Prometheus | ❌ |
 
 ## 🔧 Exemplos de Uso
 
 ### 1. Criando um Usuário
 
-\`\`\`bash
-curl -X POST http://localhost:3000/users \\
-  -H "Content-Type: application/json" \\
+```bash
+curl -X POST http://localhost:3000/users 
+  -H "Content-Type: application/json" 
   -d '{
     "name": "João Silva",
     "email": "joao@exemplo.com",
     "password": "MinhaSenh@123",
     "role": "admin"
   }'
-\`\`\`
+```
 
 **Resposta:**
-\`\`\`json
+```json
 {
   "id": "uuid-gerado",
   "name": "João Silva",
@@ -245,55 +163,55 @@ curl -X POST http://localhost:3000/users \\
   "createdAt": "2024-01-01T10:00:00.000Z",
   "updatedAt": "2024-01-01T10:00:00.000Z"
 }
-\`\`\`
+```
 
 ### 2. Fazendo Login
 
-\`\`\`bash
-curl -X POST http://localhost:3000/auth/login \\
-  -H "Content-Type: application/json" \\
+```bash
+curl -X POST http://localhost:3000/auth/login 
+  -H "Content-Type: application/json" 
   -d '{
     "email": "joao@exemplo.com",
     "password": "MinhaSenh@123"
   }'
-\`\`\`
+```
 
 **Resposta:**
-\`\`\`json
+```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
-\`\`\`
+```
 
 ### 3. Criando um Produtor
 
-\`\`\`bash
-curl -X POST http://localhost:3000/producers \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+```bash
+curl -X POST http://localhost:3000/producers 
+  -H "Content-Type: application/json" 
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" 
   -d '{
     "name": "Maria Santos",
     "document": "12345678901"
   }'
-\`\`\`
+```
 
 **Resposta:**
-\`\`\`json
+```json
 {
   "id": "uuid-gerado",
   "name": "Maria Santos",
   "document": "12345678901",
   "farms": []
 }
-\`\`\`
+```
 
 ### 4. Criando uma Fazenda
 
-\`\`\`bash
-curl -X POST http://localhost:3000/farms \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+```bash
+curl -X POST http://localhost:3000/farms 
+  -H "Content-Type: application/json" 
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" 
   -d '{
     "name": "Fazenda Esperança",
     "city": "São Paulo",
@@ -303,40 +221,40 @@ curl -X POST http://localhost:3000/farms \\
     "vegetationArea": 30,
     "producerId": "uuid-do-produtor"
   }'
-\`\`\`
+```
 
 ### 5. Criando uma Cultura
 
-\`\`\`bash
-curl -X POST http://localhost:3000/crops \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+```bash
+curl -X POST http://localhost:3000/crops 
+  -H "Content-Type: application/json" 
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" 
   -d '{
     "name": "Soja"
   }'
-\`\`\`
+```
 
 ### 6. Criando uma Safra
 
-\`\`\`bash
-curl -X POST http://localhost:3000/harvests \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer SEU_ACCESS_TOKEN" \\
+```bash
+curl -X POST http://localhost:3000/harvests 
+  -H "Content-Type: application/json" 
+  -H "Authorization: Bearer SEU_ACCESS_TOKEN" 
   -d '{
     "name": "Safra Verão 2024",
     "farmId": "uuid-da-fazenda",
     "crops": ["uuid-cultura-1", "uuid-cultura-2"]
   }'
-\`\`\`
+```
 
 ### 7. Consultando Health Check
 
-\`\`\`bash
+```bash
 curl http://localhost:3000/health
-\`\`\`
+```
 
 **Resposta:**
-\`\`\`json
+```json
 {
   "status": "ok",
   "info": {
@@ -345,13 +263,13 @@ curl http://localhost:3000/health
     }
   }
 }
-\`\`\`
+```
 
 ## 🧪 Testes
 
 ### Executando Testes
 
-\`\`\`bash
+```bash
 # Testes unitários
 npm run test
 
@@ -363,11 +281,11 @@ npm run test:e2e
 
 # Coverage
 npm run test:cov
-\`\`\`
+```
 
 ### Estrutura de Testes
 
-\`\`\`
+```
 test/
 ├── e2e/                    # Testes end-to-end
 │   ├── factories/          # Factories para dados de teste
@@ -375,22 +293,22 @@ test/
 │   └── *.e2e-spec.ts      # Arquivos de teste E2E
 ├── mocks/                 # Mocks globais
 └── setup.ts              # Configuração dos testes
-\`\`\`
+```
 
 ## 📊 Monitoramento
 
 ### Métricas com Prometheus
 
-Acesse: \`http://localhost:9090\`
+Acesse: `http://localhost:9090`
 
 Métricas disponíveis:
-- \`http_requests_total\` - Total de requisições HTTP
-- \`http_request_duration_seconds\` - Duração das requisições
-- \`http_requests_in_progress\` - Requisições em andamento
+- `http_requests_total` - Total de requisições HTTP
+- `http_request_duration_seconds` - Duração das requisições
+- `http_requests_in_progress` - Requisições em andamento
 
 ### Dashboard com Grafana
 
-Acesse: \`http://localhost:3001\`
+Acesse: `http://localhost:3001`
 
 - **Usuário**: admin
 - **Senha**: admin
@@ -398,12 +316,12 @@ Acesse: \`http://localhost:3001\`
 ### Logs
 
 Os logs são salvos em:
-- \`logs/combined.log\` - Todos os logs
-- \`logs/error.log\` - Apenas erros
+- `logs/combined.log` - Todos os logs
+- `logs/error.log` - Apenas erros
 
 ## 📁 Estrutura do Projeto
 
-\`\`\`
+```
 src/
 ├── common/                 # Código compartilhado
 │   ├── decorators/        # Decorators customizados
@@ -425,13 +343,13 @@ src/
 │   └── metrics/         # Métricas
 ├── app.module.ts        # Módulo principal
 └── main.ts             # Ponto de entrada
-\`\`\`
+```
 
 ### Padrão dos Módulos
 
 Cada módulo segue a estrutura:
 
-\`\`\`
+```
 module/
 ├── dto/                 # Data Transfer Objects
 ├── entities/           # Entidades do banco
@@ -439,7 +357,7 @@ module/
 ├── module.controller.ts # Controller
 ├── module.service.ts   # Service
 └── module.module.ts    # Module
-\`\`\`
+```
 
 ## 🔐 Autenticação e Autorização
 
@@ -451,14 +369,14 @@ module/
 
 ### Fluxo de Autenticação
 
-1. **Login**: POST \`/auth/login\` com email/senha
+1. **Login**: POST `/auth/login` com email/senha
 2. **Recebe**: Access token (15min) + Refresh token (7 dias)
-3. **Usa**: Access token no header \`Authorization: Bearer <token>\`
-4. **Renova**: POST \`/auth/refresh-token\` quando access token expira
+3. **Usa**: Access token no header `Authorization: Bearer <token>`
+4. **Renova**: POST `/auth/refresh-token` quando access token expira
 
 ### Exemplo de Uso com Token
 
-\`\`\`javascript
+```javascript
 // 1. Login
 const loginResponse = await fetch('/auth/login', {
   method: 'POST',
@@ -474,23 +392,23 @@ const { accessToken } = await loginResponse.json();
 // 2. Usar token nas requisições
 const response = await fetch('/producers', {
   headers: {
-    'Authorization': \`Bearer \${accessToken}\`,
+    'Authorization': `Bearer ${accessToken}`,
     'Content-Type': 'application/json'
   }
 });
-\`\`\`
+```
 
 ## 🚨 Tratamento de Erros
 
 A API retorna erros padronizados:
 
-\`\`\`json
+```json
 {
   "statusCode": 400,
   "message": "Validation failed",
   "error": "Bad Request"
 }
-\`\`\`
+```
 
 ### Códigos de Status Comuns
 
@@ -505,7 +423,7 @@ A API retorna erros padronizados:
 
 ## 🔧 Scripts Disponíveis
 
-\`\`\`bash
+```bash
 # Desenvolvimento
 npm run start:dev        # Inicia com hot reload
 npm run start:debug      # Inicia com debug
@@ -526,13 +444,13 @@ npm run lint:fix       # Corrige problemas automaticamente
 
 # Formatação
 npm run format         # Formata código com Prettier
-\`\`\`
+```
 
 ## 🐳 Docker
 
 ### Comandos Úteis
 
-\`\`\`bash
+```bash
 # Construir imagens
 docker-compose build
 
@@ -547,7 +465,7 @@ docker-compose down
 
 # Limpar volumes (CUIDADO: apaga dados)
 docker-compose down -v
-\`\`\`
+```
 
 ### Portas dos Serviços
 
@@ -559,9 +477,9 @@ docker-compose down -v
 ## 🤝 Contribuição
 
 1. Fork o projeto
-2. Crie uma branch para sua feature (\`git checkout -b feature/AmazingFeature\`)
-3. Commit suas mudanças (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push para a branch (\`git push origin feature/AmazingFeature\`)
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
 ### Padrões de Código
