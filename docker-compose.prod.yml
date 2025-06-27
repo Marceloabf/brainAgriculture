@@ -1,7 +1,0 @@
-services:
-  api:
-    env_file:
-      - ./env/.env.prod
-    command: npm run start:prod
-    volumes:
-      - /app/node_modules  
