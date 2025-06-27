@@ -293,7 +293,7 @@ Métricas disponíveis:
 - `http_requests_total` - Total de requisições HTTP
 - `http_request_duration_seconds` - Duração das requisições
 - `http_requests_in_progress` - Requisições em andamento
-e muito mais.. convido a explorar.
+-  e muito mais, recomendo explorar!!
 
 ### Dashboard com Grafana
 
