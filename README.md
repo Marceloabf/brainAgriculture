@@ -93,10 +93,10 @@ Caso vá configurar para prod, apenas criar o arquivo com o comando de prod:
 ### Opção 1: Com Docker (Recomendado)
 
 #### Desenvolvimento
-# Inicie todos os serviços (API, PostgreSQL, Prometheus, Grafana)
+### Inicie todos os serviços (API, PostgreSQL, Prometheus, Grafana)
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 
-# Visualize os logs
+### Visualize os logs
 docker-compose logs -f api
 
 
@@ -106,7 +106,7 @@ Acesse: `http://localhost:3000`
 
 Você deve ver: `Hello World!`
 
-# OU
+### OU
 Acesse: `http://localhost:3000health`
 
 Você deve ver: `{"status":"ok","info":{"database":{"status":"up"}},"error":{},"details":{"database":{"status":"up"}}}`
@@ -283,18 +283,6 @@ npm run test:e2e
 npm run test:cov
 ```
 
-### Estrutura de Testes
-
-```
-test/
-├── e2e/                    # Testes end-to-end
-│   ├── factories/          # Factories para dados de teste
-│   ├── mocks/             # Mocks para guards
-│   └── *.e2e-spec.ts      # Arquivos de teste E2E
-├── mocks/                 # Mocks globais
-└── setup.ts              # Configuração dos testes
-```
-
 ## 📊 Monitoramento
 
 ### Métricas com Prometheus
@@ -305,6 +293,7 @@ Métricas disponíveis:
 - `http_requests_total` - Total de requisições HTTP
 - `http_request_duration_seconds` - Duração das requisições
 - `http_requests_in_progress` - Requisições em andamento
+e muito mais.. convido a explorar.
 
 ### Dashboard com Grafana
 
