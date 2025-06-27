@@ -12,7 +12,7 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
 import { CreateProducerDto } from './dto/create-producer.dto';
@@ -20,6 +20,7 @@ import { UpdateProducerDto } from './dto/update-producer.dto';
 import { ProducerService } from './producer.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
+@ApiBearerAuth() 
 @ApiTags('producers')
 @Controller('producers')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))

@@ -11,7 +11,7 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
 import { CreateFarmDto } from './dto/create-farm.dto';
@@ -21,6 +21,7 @@ import { FarmService } from './farm.service';
 import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
+@ApiBearerAuth() 
 @ApiTags('farms')
 @Controller('farms')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))

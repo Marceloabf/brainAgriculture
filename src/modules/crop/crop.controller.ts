@@ -8,7 +8,7 @@ import {
   Put,
   Query
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
 import { CropService } from './crop.service';
@@ -18,6 +18,7 @@ import { Crop } from './entities/crop.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
+@ApiBearerAuth() 
 @ApiTags('crops')
 @Controller('crops')
 export class CropController {

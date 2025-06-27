@@ -13,14 +13,14 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
 import { CreateHarvestDto } from './dto/create-harvest.dto';
 import { UpdateHarvestDto } from './dto/update-harvest.dto';
 import { HarvestService } from './harvest.service';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
-
+@ApiBearerAuth() 
 @ApiTags('harvests')
 @Controller('harvests')
 export class HarvestController {
