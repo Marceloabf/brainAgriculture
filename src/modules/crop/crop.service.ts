@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { Crop } from './entities/crop.entity';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { UpdateCropDto } from './dto/update-crop.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @Injectable()
 export class CropService {
@@ -68,18 +70,34 @@ export class CropService {
     }
   }
 
-  async findAll(): Promise<Crop[]> {
-    this.logger.log('Buscando todas as culturas');
+ async findAll(paginationQuery: PaginationQueryDto): Promise<PaginationResult<Crop>> {
+  this.logger.log('Buscando todas as culturas');
+  const { page = 1, limit = 10 } = paginationQuery;
 
-    try {
-      const crops = await this.cropRepository.find({ relations: ['harvest'] });
-      this.logger.log(`Retornadas ${crops.length} culturas`);
-      return crops;
-    } catch (error) {
-      this.logger.error('Erro ao buscar culturas.', error.stack);
-      throw new InternalServerErrorException('Erro ao buscar culturas.');
-    }
+  try {
+    const [items, totalItems] = await this.cropRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: ['harvest'],
+    });
+
+    this.logger.log(`Retornadas ${items.length} culturas`);
+    return {
+      data: items,
+      meta: {
+        totalItems,
+        itemCount: items.length,
+        itemsPerPage: Number(limit),
+        totalPages: Math.ceil(totalItems / Number(limit)),
+        currentPage: Number(page),
+      },
+    };
+  } catch (error) {
+    this.logger.error('Erro ao buscar culturas.', error.stack);
+    throw new InternalServerErrorException('Erro ao buscar culturas.');
   }
+}
+
 
   async update(id: string, dto: UpdateCropDto): Promise<Crop> {
     this.logger.log(`Atualizando cultura ID ${id} com dados: ${JSON.stringify(dto)}`);

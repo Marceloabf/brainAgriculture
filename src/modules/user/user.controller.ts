@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './entities/user.entity';
 import { UserService } from './user.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -39,8 +41,8 @@ export class UserController {
   @Get()
   @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
-  async findAll() {
-    return await this.userService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return await this.userService.findAll(paginationQuery);
   }
 
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)

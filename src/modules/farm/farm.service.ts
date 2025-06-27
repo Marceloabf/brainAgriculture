@@ -11,6 +11,8 @@ import { Farm } from './entities/farm.entity';
 import { Producer } from '../producer/entities/producer.entity';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @Injectable()
 export class FarmService {
@@ -64,15 +66,28 @@ export class FarmService {
     }
   }
 
-  async findAll(): Promise<Farm[]> {
+  async findAll(paginationQuery: PaginationQueryDto): Promise<PaginationResult<Farm>> {
    this.logger.log('Buscando todas as fazendas');
+  const { page = 1, limit = 10 } = paginationQuery;
 
     try {
-      const farms = await this.farmRepository.find({
+      const [items, totalItems] = await this.farmRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
         relations: ['producer', 'harvests'],
       });
-      this.logger.log(`Retornadas ${farms.length} fazendas`);
-      return farms;
+
+      this.logger.log(`Retornadas ${items.length} fazendas`);
+      return {
+        data: items,
+        meta: {
+          totalItems,
+          itemCount: items.length,
+          itemsPerPage: Number(limit),
+          totalPages: Math.ceil(totalItems / Number(limit)),
+          currentPage: Number(page),
+        },
+      };
     } catch (error) {
       this.logger.error('Erro ao buscar fazendas.', error.stack);
       throw new InternalServerErrorException('Erro ao buscar fazendas.');

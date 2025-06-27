@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { Farm } from './entities/farm.entity';
 import { FarmService } from './farm.service';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiTags('farms')
 @Controller('farms')
@@ -39,8 +42,8 @@ export class FarmController {
   @Get()
   @ApiOperation({ summary: 'Listar todas as Fazendas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
-  async findAll(): Promise<Farm[]> {
-    return await this.farmService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto): Promise<PaginationResult<Farm>> {
+    return await this.farmService.findAll(paginationQuery);
   }
 
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)

@@ -14,6 +14,8 @@ import { CreateHarvestDto } from './dto/create-harvest.dto';
 import { UpdateHarvestDto } from './dto/update-harvest.dto';
 import { Farm } from '../farm/entities/farm.entity';
 import { Crop } from '../crop/entities/crop.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @Injectable()
 export class HarvestService {
@@ -31,9 +33,11 @@ export class HarvestService {
   ) {}
 
   async create(dto: CreateHarvestDto): Promise<Harvest> {
-   this.logger.log(`Tentativa de criar safra: ${JSON.stringify(dto)}`);
+    this.logger.log(`Tentativa de criar safra: ${JSON.stringify(dto)}`);
 
-    const farm = await this.farmRepository.findOne({ where: { id: dto.farmId } });
+    const farm = await this.farmRepository.findOne({
+      where: { id: dto.farmId },
+    });
     if (!farm) {
       this.logger.error(`Fazenda com ID ${dto.farmId} não encontrada.`);
       throw new NotFoundException('Fazenda não encontrada.');
@@ -43,16 +47,24 @@ export class HarvestService {
       where: { name: dto.name, farm: { id: dto.farmId } },
     });
     if (existing) {
-      this.logger.error(`Já existe uma safra com o nome "${dto.name}" para a fazenda ID ${dto.farmId}.`);
-      throw new ConflictException('Já existe uma safra com esse nome para esta fazenda.');
+      this.logger.error(
+        `Já existe uma safra com o nome "${dto.name}" para a fazenda ID ${dto.farmId}.`,
+      );
+      throw new ConflictException(
+        'Já existe uma safra com esse nome para esta fazenda.',
+      );
     }
 
     let crops: Crop[] = [];
     if (dto.crops && dto.crops.length > 0) {
       crops = await this.cropRepository.findByIds(dto.crops);
       if (crops.length !== dto.crops.length) {
-        this.logger.error('Alguma(s) cultura(s) informada(s) não foram encontradas.');
-        throw new BadRequestException('Alguma(s) culturas informada(s) não foram encontradas.');
+        this.logger.error(
+          'Alguma(s) cultura(s) informada(s) não foram encontradas.',
+        );
+        throw new BadRequestException(
+          'Alguma(s) culturas informada(s) não foram encontradas.',
+        );
       }
     }
 
@@ -70,15 +82,32 @@ export class HarvestService {
       this.logger.error('Erro ao salvar a safra.', error.stack);
       throw new InternalServerErrorException('Erro ao salvar a safra.');
     }
-}
+  }
 
-  async findAll(): Promise<Harvest[]> {
+  async findAll(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginationResult<Harvest>> {
     this.logger.log('Buscando todas as safras');
+    const { page = 1, limit = 10 } = paginationQuery;
 
     try {
-      const harvests = await this.harvestRepository.find({ relations: ['crops', 'farm'] });
-      this.logger.log(`Retornadas ${harvests.length} safras`);
-      return harvests;
+      const [items, totalItems] = await this.harvestRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        relations: ['crops', 'farm'],
+      });
+
+      this.logger.log(`Retornadas ${items.length} safras`);
+      return {
+        data: items,
+        meta: {
+          totalItems,
+          itemCount: items.length,
+          itemsPerPage: Number(limit),
+          totalPages: Math.ceil(totalItems / Number(limit)),
+          currentPage: Number(page),
+        },
+      };
     } catch (error) {
       this.logger.error('Erro ao buscar as safras.', error.stack);
       throw new InternalServerErrorException('Erro ao buscar as safras.');
@@ -108,8 +137,10 @@ export class HarvestService {
     }
   }
 
-async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
-  this.logger.log(`Atualizando safra ID ${id} com dados: ${JSON.stringify(dto)}`);
+  async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
+    this.logger.log(
+      `Atualizando safra ID ${id} com dados: ${JSON.stringify(dto)}`,
+    );
 
     const harvest = await this.harvestRepository.findOne({
       where: { id },
@@ -125,7 +156,9 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
       const farm = await this.farmRepository.findOneBy({ id: dto.farmId });
       if (!farm) {
         this.logger.error(`Fazenda com ID ${dto.farmId} não encontrada.`);
-        throw new NotFoundException('Nova fazenda associada não foi encontrada.');
+        throw new NotFoundException(
+          'Nova fazenda associada não foi encontrada.',
+        );
       }
       harvest.farm = farm;
     }
@@ -133,8 +166,12 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
     if (dto.name) {
       const farmId = dto.farmId ?? harvest.farm?.id;
       if (!farmId) {
-        this.logger.error('Tentativa de validar nome de safra sem um ID de fazenda.');
-        throw new BadRequestException('Não é possível validar o nome sem um ID de fazenda.');
+        this.logger.error(
+          'Tentativa de validar nome de safra sem um ID de fazenda.',
+        );
+        throw new BadRequestException(
+          'Não é possível validar o nome sem um ID de fazenda.',
+        );
       }
 
       const conflict = await this.harvestRepository.findOne({
@@ -142,8 +179,12 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
       });
 
       if (conflict && conflict.id !== id) {
-        this.logger.error(`Já existe uma safra com o nome "${dto.name}" para a fazenda ID ${farmId}.`);
-        throw new ConflictException('Já existe uma safra com esse nome para esta fazenda.');
+        this.logger.error(
+          `Já existe uma safra com o nome "${dto.name}" para a fazenda ID ${farmId}.`,
+        );
+        throw new ConflictException(
+          'Já existe uma safra com esse nome para esta fazenda.',
+        );
       }
 
       harvest.name = dto.name;
@@ -152,8 +193,12 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
     if (dto.crops) {
       const crops = await this.cropRepository.findByIds(dto.crops);
       if (crops.length !== dto.crops.length) {
-        this.logger.error('Alguma(s) cultura(s) informada(s) não foram encontradas.');
-        throw new BadRequestException('Alguma(s) culturas informada(s) não foram encontradas.');
+        this.logger.error(
+          'Alguma(s) cultura(s) informada(s) não foram encontradas.',
+        );
+        throw new BadRequestException(
+          'Alguma(s) culturas informada(s) não foram encontradas.',
+        );
       }
       harvest.crops = crops;
     }
@@ -163,13 +208,16 @@ async update(id: string, dto: UpdateHarvestDto): Promise<Harvest> {
       this.logger.log(`Safra atualizada com sucesso: ID ${saved.id}`);
       return saved;
     } catch (error) {
-      this.logger.error(`Erro ao salvar a safra atualizada ID ${id}`, error.stack);
+      this.logger.error(
+        `Erro ao salvar a safra atualizada ID ${id}`,
+        error.stack,
+      );
       throw new InternalServerErrorException('Erro ao atualizar a safra.');
     }
-}
+  }
 
   async remove(id: string): Promise<void> {
-   this.logger.log(`Removendo safra ID ${id}`);
+    this.logger.log(`Removendo safra ID ${id}`);
 
     const harvest = await this.harvestRepository.findOneBy({ id });
     if (!harvest) {

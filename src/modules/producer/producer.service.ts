@@ -10,6 +10,8 @@ import { UpdateProducerDto } from './dto/update-producer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Producer } from './entities/producer.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @Injectable()
 export class ProducerService {
@@ -45,13 +47,28 @@ export class ProducerService {
     }
   }
 
-  async findAll(): Promise<Producer[]> {
+  async findAll(paginationQuery: PaginationQueryDto): Promise<PaginationResult<Producer>> {
    this.logger.log('Buscando todos os produtores');
+   const { page = 1, limit = 10 } = paginationQuery;
 
     try {
-      const producers = await this.producerRepository.find({ relations: ['farms'] });
-      this.logger.log(`Retornados ${producers.length} produtores`);
-      return producers;
+      const [items, totalItems] = await this.producerRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: ['farms'],
+    });
+
+      this.logger.log(`Retornados ${items.length} produtores`);
+      return {
+        data: items,
+        meta: {
+          totalItems,
+          itemCount: items.length,
+          itemsPerPage: Number(limit),
+          totalPages: Math.ceil(totalItems / Number(limit)),
+          currentPage: Number(page),
+        },
+      };
     } catch (error) {
       this.logger.error('Erro ao buscar produtores.', error.stack);
       throw new InternalServerErrorException('Erro ao buscar produtores.');

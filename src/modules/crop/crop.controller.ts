@@ -5,7 +5,8 @@ import {
   Get,
   Param,
   Post,
-  Put
+  Put,
+  Query
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -14,6 +15,8 @@ import { CropService } from './crop.service';
 import { CreateCropDto } from './dto/create-crop.dto';
 import { UpdateCropDto } from './dto/update-crop.dto';
 import { Crop } from './entities/crop.entity';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @ApiTags('crops')
 @Controller('crops')
@@ -38,8 +41,8 @@ export class CropController {
   @ApiOperation({ summary: 'Listar todas as Culturas' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
   @ApiResponse({ status: 500, description: 'Erro ao buscar as culturas.' })
-  async findAll(): Promise<Crop[]> {
-    return await this.cropService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto): Promise<PaginationResult<Crop>> {
+    return await this.cropService.findAll(paginationQuery);
   }
 
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)

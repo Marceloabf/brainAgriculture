@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { PaginationResult } from 'src/common/dto/pagination-result.dto';
 
 @Injectable()
 export class UserService {
@@ -44,13 +46,27 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(paginationQuery: PaginationQueryDto): Promise<PaginationResult<User>> {
      this.logger.log('Buscando todos os usuários');
+     const { page = 1, limit = 10 } = paginationQuery;
 
     try {
-      const users = await this.userRepository.find();
-      this.logger.log(`Retornados ${users.length} usuários`);
-      return users;
+      const [items, totalItems] = await this.userRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      this.logger.log(`Retornados ${items.length} usuários`);
+      return {
+        data: items,
+        meta: {
+          totalItems,
+          itemCount: items.length,
+          itemsPerPage: Number(limit),
+          totalPages: Math.ceil(totalItems / Number(limit)),
+          currentPage: Number(page),
+        },
+      };
     } catch (error) {
       this.logger.error('Erro ao buscar usuários.', error.stack);
       throw new InternalServerErrorException('Erro ao buscar usuários.');

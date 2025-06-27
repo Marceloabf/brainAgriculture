@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { UserRole } from '../user/entities/user.entity';
 import { CreateProducerDto } from './dto/create-producer.dto';
 import { UpdateProducerDto } from './dto/update-producer.dto';
 import { ProducerService } from './producer.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiTags('producers')
 @Controller('producers')
@@ -38,8 +40,8 @@ export class ProducerController {
   @Get()
   @ApiOperation({ summary: 'Listar todos os Produtores' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
-  async findAll() {
-    return await this.producerService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return await this.producerService.findAll(paginationQuery);
   }
 
   @Roles(UserRole.ADMIN, UserRole.GESTOR)

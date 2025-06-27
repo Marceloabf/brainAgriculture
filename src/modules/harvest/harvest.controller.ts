@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { UserRole } from '../user/entities/user.entity';
 import { CreateHarvestDto } from './dto/create-harvest.dto';
 import { UpdateHarvestDto } from './dto/update-harvest.dto';
 import { HarvestService } from './harvest.service';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @ApiTags('harvests')
 @Controller('harvests')
@@ -40,8 +42,8 @@ export class HarvestController {
   @Get()
   @ApiOperation({ summary: 'Listar todas as Safras' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso.' })
-  async findAll() {
-    return await this.harvestService.findAll();
+  async findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return await this.harvestService.findAll(paginationQuery);
   }
 
   @Roles(UserRole.ADMIN, UserRole.GESTOR, UserRole.FUNCIONARIO)
