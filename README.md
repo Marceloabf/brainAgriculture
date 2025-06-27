@@ -4,19 +4,19 @@ Uma API REST completa para gerenciamento de produtores rurais, fazendas, safras 
 
 ## 📋 Índice
 
-- [Características](#características)
+- [Características](#caracteristicas)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Configuração de Ambiente](#configuração-de-ambiente)
-- [Executando a Aplicação](#executando-a-aplicação)
-- [Documentação da API](#documentação-da-api)
+- [Pré-requisitos](#pre-requisitos)
+- [Instalação](#instalacao)
+- [Configuração de Ambiente](#configuracao-de-ambiente)
+- [Executando a Aplicação](#executando-a-aplicacao)
+- [Documentação da API](#documentacao-da-api)
 - [Exemplos de Uso](#exemplos-de-uso)
 - [Testes](#testes)
 - [Monitoramento](#monitoramento)
 - [Estrutura do Projeto](#estrutura-do-projeto)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+- [Contribuição](#contribuicao)
+- [Licença](#licenca)
 
 ## ✨ Características
 
