@@ -56,11 +56,27 @@ describe('Farm (e2e)', () => {
     createdFarmId = response.body.id;
   });
 
-  it('/farms (GET) should return all farms', async () => {
-    const response = await request(server).get('/farms');
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+ it('/farms (GET) should return paginated farms with metadata', async () => {
+  const response = await request(server)
+    .get('/farms?page=1&limit=10') 
+    .expect(200);
+
+  const body = response.body;
+
+  expect(body).toHaveProperty('data');
+  expect(Array.isArray(body.data)).toBe(true);
+
+  expect(body).toHaveProperty('meta');
+  expect(body.meta).toMatchObject({
+    currentPage: 1,
+    itemsPerPage: 10,
   });
+
+  expect(typeof body.meta.totalItems).toBe('number');
+  expect(typeof body.meta.totalPages).toBe('number');
+  expect(typeof body.meta.itemCount).toBe('number');
+});
+
 
   it('/farms/:id (GET) should return a single farm', async () => {
     const response = await request(server).get(`/farms/${createdFarmId}`);

@@ -24,6 +24,7 @@ describe('CropService', () => {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
+      findAndCount: jest.fn(),
       findOne: jest.fn(),
       findOneBy: jest.fn(),
       update: jest.fn(),
@@ -95,28 +96,40 @@ describe('CropService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all crops', async () => {
-      const crops = [mockCrop];
-      cropRepository.find.mockResolvedValue(crops);
+  it('should return paginated crops with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const crops = [mockCrop];
 
-      const result = await service.findAll();
+    cropRepository.findAndCount.mockResolvedValue([crops, crops.length]);
 
-      expect(result).toEqual(crops);
-      expect(cropRepository.find).toHaveBeenCalledWith({
-        relations: ['harvest'],
-      });
+    const result = await service.findAll(paginationQuery);
+
+    expect(result).toEqual({
+      data: crops,
+      meta: {
+        totalItems: crops.length,
+        itemCount: crops.length,
+        itemsPerPage: paginationQuery.limit,
+        totalPages: 1,
+        currentPage: paginationQuery.page,
+      },
     });
 
-    it('should throw InternalServerErrorException if find fails', async () => {
-      cropRepository.find.mockImplementation(() => {
-        throw new Error('Database error');
-      });
-
-      await expect(service.findAll()).rejects.toThrow(
-        InternalServerErrorException,
-      );
+    expect(cropRepository.findAndCount).toHaveBeenCalledWith({
+      skip: 0,
+      take: 10,
+      relations: ['harvest'],
     });
   });
+
+  it('should throw InternalServerErrorException if findAndCount fails', async () => {
+    cropRepository.findAndCount.mockRejectedValue(new Error('Database error'));
+
+    await expect(
+      service.findAll({ page: 1, limit: 10 }),
+    ).rejects.toThrow(InternalServerErrorException);
+  });
+});
 
   describe('findOne', () => {
     it('should return a single crop by id', async () => {

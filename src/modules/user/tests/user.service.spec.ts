@@ -25,6 +25,7 @@ describe('UserService', () => {
             create: jest.fn(),
             save: jest.fn(),
             find: jest.fn(),
+            findAndCount: jest.fn(),
             remove: jest.fn(),
           },
         },
@@ -55,13 +56,32 @@ describe('UserService', () => {
     await expect(service.create(dto)).rejects.toThrow(ConflictException);
   });
 
-  it('should return all users', async () => {
-    const users = [await createUser(), await createUser()];
-    repo.find!.mockResolvedValue(users);
+it('should return paginated users with metadata', async () => {
+  const paginationQuery = { page: 1, limit: 10 };
+  const users = [await createUser(), await createUser()];
+  const totalItems = users.length;
 
-    const result = await service.findAll();
-    expect(result).toEqual(users);
+  repo.findAndCount!.mockResolvedValue([users, totalItems]);
+
+  const result = await service.findAll(paginationQuery);
+
+  expect(result).toEqual({
+    data: users,
+    meta: {
+      totalItems,
+      itemCount: users.length,
+      itemsPerPage: paginationQuery.limit,
+      totalPages: 1,
+      currentPage: paginationQuery.page,
+    },
   });
+  
+  expect(repo.findAndCount).toHaveBeenCalledWith({
+    skip: 0,
+    take: paginationQuery.limit,
+  });
+});
+
 
   it('should return one user by id', async () => {
     const user = await createUser();

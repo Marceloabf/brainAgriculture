@@ -44,15 +44,29 @@ describe('UserController', () => {
     expect(mockUserService.create).toHaveBeenCalledWith(dto);
   });
 
-  it('should return all users', async () => {
+ describe('findAll', () => {
+  it('should return paginated users with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
     const users = await Promise.all([createUser(), createUser(), createUser()]);
+    const meta = {
+      totalItems: users.length,
+      itemCount: users.length,
+      itemsPerPage: paginationQuery.limit,
+      totalPages: 1,
+      currentPage: paginationQuery.page,
+    };
 
-    mockUserService.findAll.mockResolvedValue(users);
+    const paginatedResult = { data: users, meta };
 
-    const result = await controller.findAll();
-    expect(result).toEqual(users);
-    expect(mockUserService.findAll).toHaveBeenCalled();
+    mockUserService.findAll.mockResolvedValue(paginatedResult);
+
+    const result = await controller.findAll(paginationQuery);
+
+    expect(mockUserService.findAll).toHaveBeenCalledWith(paginationQuery);
+    expect(result).toEqual(paginatedResult);
   });
+});
+
 
   it('should find user by email', async () => {
     const user = await createUser();

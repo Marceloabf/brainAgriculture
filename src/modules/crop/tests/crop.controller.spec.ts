@@ -54,16 +54,28 @@ describe('CropController', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of crops', async () => {
-      const crops = [mockCrop];
-      mockCropService.findAll.mockResolvedValue(crops);
+  it('should return paginated crops with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
 
-      const result = await controller.findAll();
+    const mockPaginationResult = {
+      data: [mockCrop],
+      meta: {
+        totalItems: 1,
+        itemCount: 1,
+        itemsPerPage: 10,
+        totalPages: 1,
+        currentPage: 1,
+      },
+    };
 
-      expect(service.findAll).toHaveBeenCalled();
-      expect(result).toEqual(crops);
-    });
+    mockCropService.findAll.mockResolvedValue(mockPaginationResult);
+
+    const result = await controller.findAll(paginationQuery);
+
+    expect(service.findAll).toHaveBeenCalledWith(paginationQuery);
+    expect(result).toEqual(mockPaginationResult);
   });
+});
 
   describe('findOne', () => {
     it('should return a single crop by id', async () => {

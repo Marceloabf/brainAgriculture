@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { FarmService } from '../farm.service';
 import { Farm } from '../entities/farm.entity';
 import { Producer } from 'src/modules/producer/entities/producer.entity';
@@ -22,6 +22,7 @@ describe('FarmService', () => {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
+      findAndCount: jest.fn(),
       findOne: jest.fn(),
       findOneBy: jest.fn(),
       update: jest.fn(),
@@ -110,18 +111,42 @@ describe('FarmService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all farms', async () => {
-      const farms = [mockFarm];
-      farmRepository.find.mockResolvedValue(farms);
+  it('should return paginated farms with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const farms = [mockFarm];
+    const totalItems = farms.length;
 
-      const result = await service.findAll();
+    farmRepository.findAndCount.mockResolvedValue([farms, totalItems]);
 
-      expect(result).toEqual(farms);
-      expect(farmRepository.find).toHaveBeenCalledWith({
-        relations: ['producer', 'harvests'],
-      });
+    const result = await service.findAll(paginationQuery);
+
+    expect(result).toEqual({
+      data: farms,
+      meta: {
+        totalItems,
+        itemCount: farms.length,
+        itemsPerPage: paginationQuery.limit,
+        totalPages: 1,
+        currentPage: paginationQuery.page,
+      },
+    });
+
+    expect(farmRepository.findAndCount).toHaveBeenCalledWith({
+      skip: 0,
+      take: 10,
+      relations: ['producer', 'harvests'],
     });
   });
+
+  it('should throw InternalServerErrorException if findAndCount fails', async () => {
+    farmRepository.findAndCount.mockRejectedValue(new Error('DB Error'));
+
+    await expect(service.findAll({ page: 1, limit: 10 })).rejects.toThrow(
+      InternalServerErrorException,
+    );
+  });
+});
+
 
   describe('findOne', () => {
     it('should return a single farm by id', async () => {

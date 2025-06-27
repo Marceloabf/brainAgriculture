@@ -85,13 +85,25 @@ let producerId: string;
     createdHarvestId = response.body.id;
   });
 
-  it('/harvests (GET) should return an array of harvests', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/harvests')
-      .expect(200);
+ it('/harvests (GET) should return paginated harvests with metadata', async () => {
+  const response = await request(app.getHttpServer())
+    .get('/harvests?page=1&limit=10') 
+    .expect(200);
 
-    expect(Array.isArray(response.body)).toBe(true);
+  const body = response.body;
+
+  expect(body).toHaveProperty('data');
+  expect(Array.isArray(body.data)).toBe(true);
+
+  expect(body).toHaveProperty('meta');
+  expect(body.meta).toMatchObject({
+    currentPage: 1,
+    itemsPerPage: 10,
   });
+
+  expect(typeof body.meta.totalItems).toBe('number');
+  expect(typeof body.meta.totalPages).toBe('number');
+});
 
   it('/harvests/:id (GET) should return a harvest by id', async () => {
     const response = await request(app.getHttpServer())

@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from "@nestjs/testing"
 import { getRepositoryToken } from "@nestjs/typeorm"
-import { NotFoundException } from "@nestjs/common"
+import { InternalServerErrorException, NotFoundException } from "@nestjs/common"
 import { ProducerService } from "../producer.service"
 import { Producer } from "../entities/producer.entity"
 import type { CreateProducerDto } from "../dto/create-producer.dto"
@@ -20,6 +20,7 @@ describe("ProducerService", () => {
       save: jest.fn(),
       find: jest.fn(),
       findOne: jest.fn(),
+      findAndCount: jest.fn(),
       findOneBy: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -66,18 +67,42 @@ describe("ProducerService", () => {
   });
 
   describe("findAll", () => {
-    it("should return all producers", async () => {
-      const producers = Array.from({ length: 3 }, createProducer);
-      producerRepository.find.mockResolvedValue(producers);
+  it("should return paginated producers with metadata", async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const producers = Array.from({ length: 3 }, createProducer);
+    const totalItems = producers.length;
 
-      const result = await service.findAll();
+    producerRepository.findAndCount.mockResolvedValue([producers, totalItems]);
 
-      expect(result).toEqual(producers);
-      expect(producerRepository.find).toHaveBeenCalledWith({
-        relations: ["farms"],
-      });
+    const result = await service.findAll(paginationQuery);
+
+    expect(result).toEqual({
+      data: producers,
+      meta: {
+        totalItems,
+        itemCount: producers.length,
+        itemsPerPage: paginationQuery.limit,
+        totalPages: 1,
+        currentPage: paginationQuery.page,
+      },
+    });
+
+    expect(producerRepository.findAndCount).toHaveBeenCalledWith({
+      skip: 0, 
+      take: paginationQuery.limit,
+      relations: ["farms"],
     });
   });
+
+  it("should throw InternalServerErrorException if findAndCount fails", async () => {
+    producerRepository.findAndCount.mockRejectedValue(new Error("DB Error"));
+
+    await expect(service.findAll({ page: 1, limit: 10 })).rejects.toThrow(
+      InternalServerErrorException,
+    );
+  });
+});
+
 
   describe("findOne", () => {
     it("should return a single producer by id", async () => {

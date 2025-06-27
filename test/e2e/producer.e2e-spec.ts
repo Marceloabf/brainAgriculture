@@ -26,11 +26,12 @@ describe('Producer (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    );
 
     await app.init();
   });
-
 
   it('/producers (POST) - should create a producer', async () => {
     const createDto = {
@@ -50,16 +51,27 @@ describe('Producer (e2e)', () => {
     createdProducerId = response.body.id;
   });
 
- 
-  it('/producers (GET) - should return array of producers', async () => {
+  it('/producers (GET) should return paginated producers with metadata', async () => {
     const response = await request(app.getHttpServer())
-      .get('/producers')
+      .get('/producers?page=1&limit=10')
       .expect(200);
 
-    expect(Array.isArray(response.body)).toBe(true);
+    const body = response.body;
+
+    expect(body).toHaveProperty('data');
+    expect(Array.isArray(body.data)).toBe(true);
+
+    expect(body).toHaveProperty('meta');
+    expect(body.meta).toMatchObject({
+      currentPage: 1,
+      itemsPerPage: 10,
+    });
+
+    expect(typeof body.meta.totalItems).toBe('number');
+    expect(typeof body.meta.totalPages).toBe('number');
+    expect(typeof body.meta.itemCount).toBe('number');
   });
 
-  
   it('/producers/:id (GET) - should return a producer by id', async () => {
     const response = await request(app.getHttpServer())
       .get(`/producers/${createdProducerId}`)
@@ -85,7 +97,7 @@ describe('Producer (e2e)', () => {
   it('/producers/:id (DELETE) - should delete a producer', async () => {
     await request(app.getHttpServer())
       .delete(`/producers/${createdProducerId}`)
-      .expect(204); 
+      .expect(204);
   });
 
   afterAll(async () => {

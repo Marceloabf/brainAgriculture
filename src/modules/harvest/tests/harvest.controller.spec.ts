@@ -63,16 +63,28 @@ describe('HarvestController', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of harvests', async () => {
-      const harvests = [createHarvest(), createHarvest()];
-      mockHarvestService.findAll.mockResolvedValue(harvests);
+  it('should return paginated harvests with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const harvests = [createHarvest(), createHarvest()];
+    const meta = {
+      totalItems: harvests.length,
+      itemCount: harvests.length,
+      itemsPerPage: paginationQuery.limit,
+      totalPages: 1,
+      currentPage: paginationQuery.page,
+    };
 
-      const result = await controller.findAll();
+    const paginatedResult = { data: harvests, meta };
 
-      expect(service.findAll).toHaveBeenCalled();
-      expect(result).toEqual(harvests);
-    });
+    mockHarvestService.findAll.mockResolvedValue(paginatedResult);
+
+    const result = await controller.findAll(paginationQuery);
+
+    expect(mockHarvestService.findAll).toHaveBeenCalledWith(paginationQuery);
+    expect(result).toEqual(paginatedResult);
   });
+});
+
 
   describe('findOne', () => {
     it('should return a single harvest by id', async () => {

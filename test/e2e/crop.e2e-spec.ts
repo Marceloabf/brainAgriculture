@@ -47,10 +47,25 @@ describe('Crop (e2e)', () => {
     createdCropId = response.body.id;
   });
 
-  it('/crops (GET) should list crops', async () => {
-    const response = await request(server).get('/crops');
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
+  it('/crops (GET) should return paginated crops with metadata', async () => {
+    const response = await request(server)
+      .get('/crops?page=1&limit=10')
+      .expect(200);
+
+    const body = response.body;
+
+    expect(body).toHaveProperty('data');
+    expect(Array.isArray(body.data)).toBe(true);
+
+    expect(body).toHaveProperty('meta');
+    expect(body.meta).toMatchObject({
+      currentPage: 1,
+      itemsPerPage: 10,
+    });
+
+    expect(typeof body.meta.totalItems).toBe('number');
+    expect(typeof body.meta.totalPages).toBe('number');
+    expect(typeof body.meta.itemCount).toBe('number');
   });
 
   it('/crops/:id (GET) should return a single crop', async () => {

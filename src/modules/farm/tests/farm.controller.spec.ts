@@ -63,16 +63,27 @@ describe('FarmController', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of farms', async () => {
-      const farms = [mockFarm];
-      mockFarmService.findAll.mockResolvedValue(farms);
+  it('should return paginated farms with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const farms = [mockFarm];
+    const meta = {
+      totalItems: farms.length,
+      itemCount: farms.length,
+      itemsPerPage: paginationQuery.limit,
+      totalPages: 1,
+      currentPage: paginationQuery.page,
+    };
 
-      const result = await controller.findAll();
+    const paginatedResult = { data: farms, meta };
 
-      expect(service.findAll).toHaveBeenCalled();
-      expect(result).toEqual(farms);
-    });
+    mockFarmService.findAll.mockResolvedValue(paginatedResult);
+
+    const result = await controller.findAll(paginationQuery);
+
+    expect(service.findAll).toHaveBeenCalledWith(paginationQuery);
+    expect(result).toEqual(paginatedResult);
   });
+});
 
   describe('findOne', () => {
     it('should return a farm by id', async () => {

@@ -47,18 +47,29 @@ describe('ProducerController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return an array of producers', async () => {
-      const producers = [createProducer(), createProducer()];
+ describe('findAll', () => {
+  it('should return paginated producers with metadata', async () => {
+    const paginationQuery = { page: 1, limit: 10 };
+    const producers = [createProducer(), createProducer()];
+    const meta = {
+      totalItems: producers.length,
+      itemCount: producers.length,
+      itemsPerPage: paginationQuery.limit,
+      totalPages: 1,
+      currentPage: paginationQuery.page,
+    };
 
-      mockProducerService.findAll.mockResolvedValue(producers);
+    const paginatedResult = { data: producers, meta };
 
-      const result = await controller.findAll();
+    mockProducerService.findAll.mockResolvedValue(paginatedResult);
 
-      expect(service.findAll).toHaveBeenCalled();
-      expect(result).toEqual(producers);
-    });
+    const result = await controller.findAll(paginationQuery);
+
+    expect(mockProducerService.findAll).toHaveBeenCalledWith(paginationQuery);
+    expect(result).toEqual(paginatedResult);
   });
+});
+
 
   describe('findOne', () => {
     it('should return a single producer by id', async () => {
