@@ -44,7 +44,7 @@ Antes de começar, certifique-se de ter instalado:
 
 ### 1. Clone o repositório
 
-git clone [https://github.com/Marceloabf/brain-agriculture.git](https://github.com/Marceloabf/brainAgriculture)
+git clone [https://github.com/Marceloabf/brain-agriculture.git](https://github.com/Marceloabf/brainAgriculture)<br>
 cd brain-agriculture
 
 ### 2. Instale as dependências
