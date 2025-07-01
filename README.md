@@ -92,7 +92,7 @@ Acesse: `http://localhost:3000`
 Você deve ver: `Hello World!`
 
 ### OU
-Acesse: `http://localhost:3000health`
+Acesse: `http://localhost:3000/health`
 
 Você deve ver: `{"status":"ok","info":{"database":{"status":"up"}},"error":{},"details":{"database":{"status":"up"}}}`
 
